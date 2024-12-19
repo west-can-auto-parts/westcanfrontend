@@ -18,20 +18,9 @@ const CreateCategoryPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchParentCategories() {
-      try {
-        const response = await fetch('/api/categories');
-        if (!response.ok) throw new Error('Failed to fetch parent categories');
-        const data = await response.json();
-        setParentCategories(data); // Populate parent categories
-      } catch (error: any) {
-        setError(error.message);
-      }
-    }
+  const apiUrl = 'http://localhost:8081/admin/api'
 
-    fetchParentCategories();
-  }, []);
+
 
   const handleCreate = async () => {
     if (!name) {
@@ -40,7 +29,7 @@ const CreateCategoryPage = () => {
     }
 
     try {
-      await fetch('/api/categories', {
+      await fetch(`${apiUrl}/category/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -133,22 +122,6 @@ const CreateCategoryPage = () => {
               <img key={index} src={url} alt={`Uploaded image ${index}`} className="w-32 h-32 object-cover mb-2 rounded-md" />
             ))}
           </div>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Parent Category</label>
-          <select
-            value={parentId || ''}
-            onChange={(e) => setParentId(e.target.value || null)}
-            className="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">None</option>
-            {parentCategories.map((parent: any) => (
-              <option key={parent.id} value={parent.id}>
-                {parent.name}
-              </option>
-            ))}
-          </select>
         </div>
 
         <div>

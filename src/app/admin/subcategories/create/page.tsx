@@ -204,33 +204,6 @@ const SubCategoriesPage = () => {
             ))}
           </div>
         </div>
-        {/* <div className="mb-4">
-          <label className="block">Properties</label>
-          <input
-            type="text"
-            value={propertyKey}
-            onChange={(e) => setPropertyKey(e.target.value)}
-            placeholder="Key"
-            className="border p-2 rounded w-full mb-2"
-          />
-          <input
-            type="text"
-            value={propertyValue}
-            onChange={(e) => setPropertyValue(e.target.value)}
-            placeholder="Value"
-            className="border p-2 rounded w-full mb-2"
-          />
-          <button type="button" onClick={handleAddProperty} className="bg-gray-500 text-white px-4 py-2 rounded mt-2">
-            Add Property
-          </button>
-          <div className="mt-2">
-            {formData.properties.map((prop, index) => (
-              <p key={index}>
-                {prop.key}: {prop.value}
-              </p>
-            ))}
-          </div>
-        </div> */}
         <div className="mb-4">
           <label className="block">Category</label>
           <select

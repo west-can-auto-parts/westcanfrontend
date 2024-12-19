@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {CldUploadWidget} from 'next-cloudinary'
+import { CldUploadWidget } from 'next-cloudinary'
 
 interface ProductCategory {
   id: string;
   name: string;
   description: string;
-  images: string[];
-  parentId?: string;
-  properties: { key: string; value: string }[];
+  imageUrl: string[];
+  categoryId: string;
+  subCategoryId: string;
   tags: string[];
   featured: boolean;
   bestSeller: boolean;
@@ -21,20 +21,26 @@ interface Category {
   name: string;
 }
 
+interface SubCategory {
+  id: string;
+  name: string;
+}
+
 const ProductCategoriesPage = () => {
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [productCategories, setProductCategories] = useState<Category[]>([]);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [allsubCategory, setAllSubCategory] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [formData, setFormData] = useState<ProductCategory>({
     id: '', // Assuming ID is managed by the backend and not needed on the form
     name: '',
     description: '',
-    images: [],
-    parentId: '',
-    properties: [],
+    imageUrl: [],
     tags: [],
-    featured: true,
-    bestSeller: true,
+    featured: false,
+    bestSeller: false,
+    categoryId: '',
+    subCategoryId: '',
   });
   const [imageUrl, setImageUrl] = useState<string>('');
   const [propertyKey, setPropertyKey] = useState<string>('');
@@ -42,14 +48,14 @@ const ProductCategoriesPage = () => {
   const [tag, setTag] = useState<string>('');
 
   const router = useRouter();
+  const apiUrl = 'http://localhost:8081/admin/api'
 
-  const handleImageUpload = (result:any) => {
+  const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
     setFormData(prevData => ({
       ...prevData,
-      imageUrls: [...prevData.images, imageUrl] // Append new image URL to the array
+      imageUrl: [...prevData.imageUrl, imageUrl] // Append new image URL to the array
     }));
-    console.log(formData.images)
   };
 
 
@@ -57,18 +63,19 @@ const ProductCategoriesPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const categoryRes = await fetch('/api/productcategories');
-        const allCategoryRes = await fetch('/api/subcategories');
-        
-        if (!categoryRes.ok || !allCategoryRes.ok) {
+        const allCategoryRes = await fetch(`${apiUrl}/category`);
+        const allSubCategoryRes = await fetch(`${apiUrl}/subcategory`)
+
+        if (!allCategoryRes.ok || !allSubCategoryRes.ok) {
           throw new Error('Failed to fetch data');
         }
 
-        const categoryData = await categoryRes.json();
         const allCategoryData = await allCategoryRes.json();
+        const allSubCategoryData = await allSubCategoryRes.json();
 
-        setCategories(categoryData);
+
         setAllCategories(allCategoryData);
+        setAllSubCategory(allSubCategoryData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -93,23 +100,13 @@ const ProductCategoriesPage = () => {
     if (imageUrl) {
       setFormData({
         ...formData,
-        images: [...formData.images, imageUrl],
+        imageUrl: [...formData.imageUrl, imageUrl],
       });
       setImageUrl('');
     }
   };
 
-  // Handle property addition
-  const handleAddProperty = () => {
-    if (propertyKey && propertyValue) {
-      setFormData({
-        ...formData,
-        properties: [...formData.properties, { key: propertyKey, value: propertyValue }],
-      });
-      setPropertyKey('');
-      setPropertyValue('');
-    }
-  };
+
 
   // Handle tag addition
   const handleAddTag = () => {
@@ -126,7 +123,7 @@ const ProductCategoriesPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/productcategories', {
+    const res = await fetch(`${apiUrl}/product-category/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(formData),
@@ -137,13 +134,12 @@ const ProductCategoriesPage = () => {
     }
   };
 
-  // Handle delete category
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/productcategories/${id}`, { method: 'DELETE' });
-
-    if (res.ok) {
-      setCategories(categories.filter((category) => category.id !== id));
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
   };
 
   if (loading) {
@@ -166,16 +162,28 @@ const ProductCategoriesPage = () => {
             onChange={handleInputChange}
             className="border p-2 rounded w-full"
             required
+            style={{
+              width: "500px", // Set dynamic height based on content
+              resize: "none", // Disable manual resizing
+              overflow: "hidden", // Prevent scrollbars
+            }}
           />
         </div>
         <div className="mb-4">
           <label className="block">Description</label>
-          <input
-            type="text"
-            name="description"
-            value={formData.description}
-            onChange={handleInputChange}
-            className="border p-2 rounded w-full"
+          <textarea
+            id="content"
+            name="description" 
+            value={formData.description} 
+            onChange={handleChange} 
+            required
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+            style={{
+              width: "500px", 
+              resize: "none", 
+              overflow: "hidden", 
+            }}
+            rows={6}
           />
         </div>
         <div className="mb-4">
@@ -191,7 +199,7 @@ const ProductCategoriesPage = () => {
             )}
           </CldUploadWidget>
           <div className="mt-2">
-            {formData.images.map((img, index) => (
+            {formData.imageUrl.map((img, index) => (
               <p key={index}>{img}</p>
             ))}
           </div>
@@ -203,8 +211,13 @@ const ProductCategoriesPage = () => {
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             className="border p-2 rounded w-full"
+            style={{
+              width: "500px", // Set dynamic height based on content
+              resize: "none", // Disable manual resizing
+              overflow: "hidden", // Prevent scrollbars
+            }}
           />
-          <button type="button" onClick={handleAddTag} className="bg-gray-500 text-white px-4 py-2 rounded mt-2">
+          <button type="button" onClick={handleAddTag} className="bg-blue-500 text-white px-4 py-2 rounded">
             Add Tag
           </button>
           <div className="mt-2">
@@ -214,41 +227,40 @@ const ProductCategoriesPage = () => {
           </div>
         </div>
         <div className="mb-4">
-          <label className="block">Properties</label>
-          <input
-            type="text"
-            value={propertyKey}
-            onChange={(e) => setPropertyKey(e.target.value)}
-            placeholder="Key"
-            className="border p-2 rounded w-full mb-2"
-          />
-          <input
-            type="text"
-            value={propertyValue}
-            onChange={(e) => setPropertyValue(e.target.value)}
-            placeholder="Value"
-            className="border p-2 rounded w-full mb-2"
-          />
-          <button type="button" onClick={handleAddProperty} className="bg-gray-500 text-white px-4 py-2 rounded mt-2">
-            Add Property
-          </button>
-          <div className="mt-2">
-            {formData.properties.map((prop, index) => (
-              <p key={index}>
-                {prop.key}: {prop.value}
-              </p>
-            ))}
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block">Parent Category</label>
+          <label className="block">SubCategory</label>
           <select
-            name="parentId"
-            value={formData.parentId || ''}
+            name="subCategoryId"
+            value={formData.subCategoryId || ''}
             onChange={handleInputChange}
             className="border p-2 rounded w-full"
+            style={{
+              width: "500px", 
+              resize: "none", 
+              overflow: "hidden", 
+            }}
           >
-            <option value="">Select Parent Category</option>
+            <option value="">Select SubCategory</option>
+            {allsubCategory.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-4">
+          <label className="block">Category</label>
+          <select
+            name="categoryId"
+            value={formData.categoryId || ''}
+            onChange={handleInputChange}
+            className="border p-2 rounded w-full"
+            style={{
+              width: "500px", // Set dynamic height based on content
+              resize: "none", // Disable manual resizing
+              overflow: "hidden", // Prevent scrollbars
+            }}
+          >
+            <option value="">Select Category</option>
             {allCategories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}

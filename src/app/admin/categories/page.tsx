@@ -12,14 +12,16 @@ const AdminCategoriesPage = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const apiUrl = 'http://localhost:8081/admin/api'
+
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const response = await fetch('/api/categories');
+        const response = await fetch(`${apiUrl}/category`);
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
         setCategories(data);
-      } catch (error:any) {
+      } catch (error: any) {
         setError(error.message);
       } finally {
         setLoading(false);
@@ -32,7 +34,7 @@ const AdminCategoriesPage = () => {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this category?')) {
       try {
-        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+        await fetch(`${apiUrl}/category/delete/${id}`, { method: 'DELETE' });
         setCategories(categories.filter(cat => cat.id !== id));
       } catch (error) {
         console.error('Error deleting category:', error);
@@ -57,7 +59,6 @@ const AdminCategoriesPage = () => {
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Category Name</th>
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Description</th>
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Images</th>
-              <th className="px-4 py-2 text-left text-gray-700 font-semibold">Parent Category</th>
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Tags</th>
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Featured</th>
               <th className="px-4 py-2 text-left text-gray-700 font-semibold">Best Seller</th>
@@ -82,10 +83,10 @@ const AdminCategoriesPage = () => {
                     </ul>
                   ) : 'No Images'}
                 </td>
-                <td className="px-4 py-2 text-gray-900">{category.parentId ? category.parentId : 'N/A'}</td>
                 <td className="px-4 py-2 text-gray-900">
-                  {category.tags.length > 0 ? category.tags.join(', ') : 'No Tags'}
+                  {category.tags?.length > 0 ? category.tags.join(', ') : 'No Tags'}
                 </td>
+
                 <td className="px-4 py-2 text-gray-900">{category.featured ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2 text-gray-900">{category.bestSeller ? 'Yes' : 'No'}</td>
                 <td className="px-4 py-2">
