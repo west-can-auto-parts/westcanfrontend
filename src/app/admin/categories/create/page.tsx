@@ -18,7 +18,10 @@ const CreateCategoryPage = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
-  const apiUrl = 'http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
 
 
@@ -69,7 +72,7 @@ const CreateCategoryPage = () => {
     setProperties(newProperties);
   };
 
-  const handleImageUpload = (result:any) => {
+  const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
     setImages(prevImages => [...prevImages, imageUrl]); // Append new image URL to the array
   };
@@ -94,7 +97,7 @@ const CreateCategoryPage = () => {
             placeholder="Category name"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
           <textarea
@@ -134,7 +137,7 @@ const CreateCategoryPage = () => {
             placeholder="Tags (comma-separated)"
           />
         </div>
-        
+
         <div className="flex items-center space-x-4 mb-4">
           <label className="inline-flex items-center">
             <input
@@ -145,7 +148,7 @@ const CreateCategoryPage = () => {
             />
             <span className="ml-2 text-sm text-gray-700">Featured</span>
           </label>
-          
+
           <label className="inline-flex items-center">
             <input
               type="checkbox"
@@ -191,7 +194,7 @@ const CreateCategoryPage = () => {
             Add Property
           </button>
         </div>
-        
+
         <button
           onClick={handleCreate}
           className="w-fit px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"

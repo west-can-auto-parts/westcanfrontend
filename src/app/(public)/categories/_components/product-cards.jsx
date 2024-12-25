@@ -11,13 +11,11 @@ import { ListLayout } from './list-layout'
 
 export const ProductCards = ({ parts }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(12); // Default number of products per page
+  const [productsPerPage, setProductsPerPage] = useState(10); // Default number of products per page
   const [layout, setLayout] = useState('grid-4'); // Default layout is 4-column grid
 
-  // Flatten the parts array to get all sub parts
-  const allParts = parts
-    .flatMap(part => part.subParts)
-    .flatMap(subPart => subPart.parts);
+  // Directly use parts since it's already flat
+  const allParts = parts;
 
   // Calculate the index range of products to display based on the current page
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -57,9 +55,9 @@ export const ProductCards = ({ parts }) => {
           </button>
           <button
             onClick={() => handleLayoutChange('grid-3')}
-            className={`hidden md:grid p-2 ${layout === 'grid-3' ? 'bg-[#b12b29] text-white' : ''}`}
+            className={`p-2 ${layout === 'grid-3' ? 'bg-[#b12b29] text-white' : ''}`}
           >
-            <FaTh /> {/* 3 Column Layout */}
+           <FaTh /> {/* 3 Column Layout */}
           </button>
           <button
             onClick={() => handleLayoutChange('grid-1')}
@@ -69,9 +67,9 @@ export const ProductCards = ({ parts }) => {
           </button>
           <button
             onClick={() => handleLayoutChange('list')}
-            className={`hidden md:grid p-2 ${layout === 'list' ? 'bg-[#b12b29] text-white' : ''}`}
+            className={`p-2 ${layout === 'list' ? 'bg-[#b12b29] text-white' : ''}`}
           >
-            <FaList /> {/* Detailed List Layout */}
+             <FaList /> {/* Detailed List Layout */}
           </button>
         </div>
 

@@ -10,72 +10,100 @@ import { BreadCrumbs } from './_components/head-links'
 import { PartSupplier } from './_components/part-supplier';
 
 
-import suppliers from '@/datas/suppliers'
-import parts from '@/datas/catalogue';
-
-const page = ({ params }) => {
+const Page = ({ params }) => {
   const slug = params.slug;
+  
+
   function stringToSlug(str) {
     return str
-      .toLowerCase()                  // Convert the string to lowercase
-      .trim()                         // Remove any leading or trailing whitespace
-      .replace(/[^a-z0-9 -]/g, '')    // Remove all non-alphanumeric characters except for spaces and hyphens
-      .replace(/\s+/g, '-')           // Replace spaces and consecutive spaces with a single hyphen
-      .replace(/--+/g, '-');          // Replace multiple hyphens with a single hyphen
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
   }
 
-  // Find the part by matching the slug
-  const findPartBySlug = () => {
-    for (const category of parts) {
-      for (const subPart of category.subParts) {
-        for (const part of subPart.parts) {
-          const partSlug = stringToSlug(part.listing);
-          if (partSlug === slug) {
-            return {part, subPart, category};
-          }
-        }
-      }
-    }
-    return null; // Return null if no match is found
-  }
+  const [myProduct, setMyProduct] = useState(null);
+  const [categoryType, setCategoryType] = useState("");
+  const [categorySlug, setCategorySlug] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [productId, setProductId] = useState(null);
 
-  const myProduct = findPartBySlug();
+  const apiUrl = 'http://localhost:8080/api/product';
 
-  const [categoryType, setCategoryType] = useState('');
-  const [categorySlug, setCategorySlug] = useState('');
 
+  
+  // Refetch product data when productId or slug changes
   useEffect(() => {
-    if (myProduct) {
-      if (myProduct.category.title === "Replacement Parts" || myProduct.category.title === "Fluids & Lubricants") {
-        setCategoryType('Replacement Parts');
-        setCategorySlug('replacement-parts');
-      } else {
-        setCategoryType('Tools & Equipments');
-        setCategorySlug('tools');
+
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${apiUrl}/product-category/${slug}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch product data");
+        }
+        const data = await response.json();
+        setMyProduct(data);
+        determineCategory(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
       }
+    };
+
+    fetchProduct();
+  }, [productId, slug]); // Added `slug` as a dependency
+
+  const determineCategory = (product) => {
+    if (
+      product.categoryName === "Replacement Parts" ||
+      product.categoryName === "Fluids & Lubricants"
+    ) {
+      setCategoryType("Replacement Parts");
+      setCategorySlug("replacement-parts");
+    } else {
+      setCategoryType("Tools & Equipments");
+      setCategorySlug("tools");
     }
-  }, [myProduct]);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   if (!myProduct) {
     return <div>Product not found</div>;
-  } 
+  }
 
   return (
-    <div className='w-10/12 mx-auto flex flex-wrap gap-2 md:gap-4 '>
+    <div className="w-10/12 mx-auto flex flex-wrap gap-2 md:gap-4">
       <div className="w-full">
-        <BreadCrumbs categorySlug={categorySlug} categoryType={categoryType} parentCategory={myProduct.subPart.listing} parentCategorySlug={stringToSlug(myProduct.subPart.listing)}
-        productLising={myProduct.part.listing} productSlug={stringToSlug(myProduct.part.listing)}/>
+        <BreadCrumbs
+          categorySlug={categorySlug}
+          categoryType={categoryType}
+          parentCategory={myProduct.subCategoryName}
+          parentCategorySlug={stringToSlug(myProduct.subCategoryName)}
+          productLising={myProduct.name}
+          productSlug={stringToSlug(myProduct.name)}
+        />
         <div className="w-full flex flex-wrap md:flex-nowrap gap-2 md:gap-8">
-          <ImageGallery myProduct={myProduct.part} />
-          <ProductDescription myProduct={myProduct.part} />
+          <ImageGallery myProduct={myProduct} />
+          <ProductDescription myProduct={myProduct} />
         </div>
-        <RelatedParts mySubPart={myProduct.subPart} />
+        <RelatedParts subCategoryName={myProduct.subCategoryName} />
       </div>
       <div className="w-full">
-        <PartSupplier mySubPart={myProduct.subPart} suppliers={suppliers} />
+        <PartSupplier subCategoryName={myProduct.name} />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default page
+export default Page;

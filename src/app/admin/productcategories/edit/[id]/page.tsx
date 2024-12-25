@@ -47,7 +47,10 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
 
   const router = useRouter();
   const { id } = params;
-  const apiUrl = 'http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   // Fetch the subcategory and categories to edit
   useEffect(() => {
@@ -127,13 +130,13 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
 
   const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
-    
+
     setFormData(prevData => ({
       ...prevData,
       imageUrl: [...(prevData.imageUrl || []), imageUrl] // Ensure imagesUrl is an array
     }));
   };
-  
+
 
   const handleAddTag = () => {
     if (tag) {

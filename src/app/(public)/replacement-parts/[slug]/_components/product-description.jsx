@@ -5,7 +5,7 @@ import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
 import React, { useState, useEffect } from 'react';
 import locations from '@/datas/store';
 
-export const ProductDescription = ({ myProduct}) => {
+export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
     const [error, setError] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,7 +19,6 @@ export const ProductDescription = ({ myProduct}) => {
     });
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
-
     // Toggle Modal visibility
     const handleModalToggle = () => {
         setIsModalOpen(!isModalOpen);
@@ -87,8 +86,8 @@ export const ProductDescription = ({ myProduct}) => {
 
     return (
         <div className='w-full md:w-1/2'>
-            <h1 className="text-2xl font-bold mb-2 py-2">{myProduct.listing}</h1>
-            <p className="text-xs md:text-sm text-justify">{myProduct.content}</p>
+            <h1 className="text-2xl font-bold mb-2 py-2">{myProduct.name}</h1>
+            <p className="text-xs md:text-sm text-justify">{myProduct.description}</p>
             <div className="py-2 flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm">
                 {myProduct.tags.map((tag, index) => (
                     <p key={index} className='bg-gray-200 font-semibold px-2 rounded-md'>{tag}</p>
@@ -178,9 +177,9 @@ export const ProductDescription = ({ myProduct}) => {
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#b21b29] focus:border-[#b21b29] sm:text-sm"
                                     >
                                         <option value={product.description}>{product.description}</option>
-                                        {product.parts?.map((part, index) => (
-                                            <option key={index} value={part.listing}>
-                                                {part.listing}
+                                        {(product?.length > 0 ? product : []).map((part, index) => (
+                                            <option key={index} value={part.description}>
+                                                {part.description}
                                             </option>
                                         ))}
                                     </select>

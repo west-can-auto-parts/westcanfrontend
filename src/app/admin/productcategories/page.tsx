@@ -33,7 +33,10 @@ const ProductCategoriesPage = () => {
 
   const router = useRouter();
 
-  const apiUrl = 'http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   // Fetch categories and all available categories
   useEffect(() => {

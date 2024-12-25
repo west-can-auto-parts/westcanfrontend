@@ -1,33 +1,52 @@
 "use client"
 
-import React from 'react'
-
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { useRouter } from 'next/navigation';
-import { Autoplay, Navigation, Pagination, Scrollbar } from 'swiper/modules';
+import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { FaShoppingCart, FaMagnifyingGlass } from 'react-icons/fa';
-
 
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import 'swiper/css/autoplay'
+import 'swiper/css/autoplay';
 
-export const RelatedParts = ({ mySubPart }) => {
-    function stringToSlug(str) {
-        return str
-          .toLowerCase()                  // Convert the string to lowercase
-          .trim()                         // Remove any leading or trailing whitespace
-          .replace(/[^a-z0-9 -]/g, '')    // Remove all non-alphanumeric characters except for spaces and hyphens
-          .replace(/\s+/g, '-')           // Replace spaces and consecutive spaces with a single hyphen
-          .replace(/--+/g, '-');          // Replace multiple hyphens with a single hyphen
-      }
-    const router = useRouter()
+export const RelatedParts = ({ subCategoryName }) => {
+
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const router = useRouter();
+    const apiUrl = 'http://localhost:8080/api/product';
+
+    useEffect(() => {
+        const fetchRelatedProducts = async () => {
+            try {
+                const encodedSubCategoryName = encodeURIComponent(subCategoryName);
+                const response = await fetch(`${apiUrl}/products-category/subCategoryName?subCategoryName=${encodedSubCategoryName}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch related products');
+                }
+                const data = await response.json();
+                setRelatedProducts(data);
+                setLoading(false);
+            } catch (err) {
+                setError(err.message);
+                setLoading(false);
+            }
+        };
+
+        if (subCategoryName) {
+            fetchRelatedProducts();
+        }
+    }, [subCategoryName]);
+
+
     return (
         <div className="w-full mx-auto py-2 md:py-4">
             <p className="text-2xl font-bold py-2">Related Products</p>
             <Swiper
-                modules={[Autoplay, Pagination]}
+                modules={[Autoplay, Pagination, Navigation]}
                 spaceBetween={6}
                 slidesPerView={2}
                 pagination={{ clickable: true }}
@@ -52,28 +71,24 @@ export const RelatedParts = ({ mySubPart }) => {
                     },
                 }}
             >
-                {mySubPart.parts.map((product, index) => (
-                    <SwiperSlide key={index} className="py-4 h-full" onClick={()=>router.push(`/shop-supplies/${stringToSlug(product.listing)}`)}>
-                        <div className="bg-white shadow-md rounded 
-                                    h-full group transition duration-300">
+                {relatedProducts.map((product, index) => (
+                    <SwiperSlide key={index} className="py-4 h-full" onClick={() => router.push(`/shop-supplies/${product.name}`)}>
+                        <div className="bg-white shadow-md rounded h-full group transition duration-300">
                             <img
-                                src={product.imageUrl1}
-                                alt={product.listing}
+                                src={product.imageUrl[0]}
+                                alt={product.name}
                                 className="w-full h-[15vh] object-cover mb-4 rounded"
                             />
                             <div className="p-3 group-hover:bg-gray-100/75">
-                                <h3 className="text-md md:text-md font-semibold mb-2 !line-clamp-1">{product.listing}</h3>
+                                <h3 className="text-md md:text-md font-semibold mb-2 !line-clamp-1">{product.name}</h3>
                                 <p className="text-gray-600 mb-2 hidden md:block text-xs !line-clamp-3 overflow-hidden">
-                                    {product.content}
+                                    {product.description}
                                 </p>
                                 <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
                                     <button className="flex items-center gap-1 transition text-xs py-1 rounded-md hover:text-[#b21b29]">
                                         <FaShoppingCart className="w-4 h-4 transition-all duration-300 rounded-full" />
                                         Shop Now
                                     </button>
-                                    {/* <div className="bg-gray-100 justify-center rounded-full text-[#b21b19] w-5 h-5 flex items-center text-lg transition-all duration-300 group-hover:bg-[#b21b29] group-hover:text-white">
-                                        <FaMagnifyingGlass className="w-3 h-3" />
-                                    </div> */}
                                 </div>
                             </div>
                         </div>
@@ -81,5 +96,5 @@ export const RelatedParts = ({ mySubPart }) => {
                 ))}
             </Swiper>
         </div>
-    )
-}
+    );
+};

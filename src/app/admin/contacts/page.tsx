@@ -22,7 +22,10 @@ const AdminContactsPage = () => {
   const [filters, setFilters] = useState({ firstName: "", startDate: "", endDate: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const apiUrl = "http://localhost:8081/admin/api";
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   useEffect(() => {
     const fetchContacts = async () => {

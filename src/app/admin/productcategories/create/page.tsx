@@ -48,7 +48,10 @@ const ProductCategoriesPage = () => {
   const [tag, setTag] = useState<string>('');
 
   const router = useRouter();
-  const apiUrl = 'http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
@@ -173,15 +176,15 @@ const ProductCategoriesPage = () => {
           <label className="block">Description</label>
           <textarea
             id="content"
-            name="description" 
-            value={formData.description} 
-            onChange={handleChange} 
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             required
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
             style={{
-              width: "500px", 
-              resize: "none", 
-              overflow: "hidden", 
+              width: "500px",
+              resize: "none",
+              overflow: "hidden",
             }}
             rows={6}
           />
@@ -234,9 +237,9 @@ const ProductCategoriesPage = () => {
             onChange={handleInputChange}
             className="border p-2 rounded w-full"
             style={{
-              width: "500px", 
-              resize: "none", 
-              overflow: "hidden", 
+              width: "500px",
+              resize: "none",
+              overflow: "hidden",
             }}
           >
             <option value="">Select SubCategory</option>

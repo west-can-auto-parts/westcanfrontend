@@ -27,7 +27,10 @@ const SubCategoriesPage = () => {
 
   const router = useRouter();
 
-  const apiUrl='http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   // Fetch subcategories and categories
   useEffect(() => {
@@ -35,7 +38,7 @@ const SubCategoriesPage = () => {
       try {
         const subCategoryRes = await fetch(`${apiUrl}/subcategory`);
         const categoryRes = await fetch(`${apiUrl}/category`);
-        
+
         if (!subCategoryRes.ok || !categoryRes.ok) {
           throw new Error('Failed to fetch data');
         }

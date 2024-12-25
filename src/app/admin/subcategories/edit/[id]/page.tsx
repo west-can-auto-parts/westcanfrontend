@@ -36,7 +36,10 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
   const { id } = params;
 
-  const apiUrl = 'http://localhost:8081/admin/api'
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://admin-pznr.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
 
   // Fetch the subcategory and categories to edit
   useEffect(() => {
