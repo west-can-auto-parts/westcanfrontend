@@ -9,7 +9,6 @@ import { RelatedParts } from './_components/related-parts'
 import { BreadCrumbs } from './_components/head-links'
 import { PartSupplier } from './_components/part-supplier';
 
-
 const Page = ({ params }) => {
   const slug = params.slug;
   
@@ -55,7 +54,7 @@ const Page = ({ params }) => {
     };
 
     fetchProduct();
-  }, [productId, slug]); // Added `slug` as a dependency
+  }, [slug]); // Added `slug` as a dependency
 
   const determineCategory = (product) => {
     if (
@@ -89,7 +88,7 @@ const Page = ({ params }) => {
           categorySlug={categorySlug}
           categoryType={categoryType}
           parentCategory={myProduct.subCategoryName}
-          parentCategorySlug={stringToSlug(myProduct.subCategoryName)}
+          parentCategorySlug={encodeURIComponent(myProduct.subCategoryName)}
           productLising={myProduct.name}
           productSlug={stringToSlug(myProduct.name)}
         />

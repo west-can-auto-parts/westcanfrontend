@@ -8,8 +8,10 @@ const Page = () => {
     const [categories, setCategories] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
     const [filteredParts, setFilteredParts] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [expandedCategory, setExpandedCategory] = useState(null);
+    const [showAllCategories, setShowAllCategories] = useState(false);
 
     const apiUrl = 'http://localhost:8080/api/product';
 
@@ -52,13 +54,11 @@ const Page = () => {
                 let url = `${apiUrl}/product-category`;
 
                 if (!selectedCategory && !selectedSubcategory) {
-                    // Call the endpoint to fetch all products when no filters are applied
                     url = `${apiUrl}/product-category/all`;
                 } else {
                     if (selectedCategory) {
                         url += `?category=${selectedCategory}`;
                     }
-
                     if (selectedSubcategory) {
                         url += `&subcategory=${selectedSubcategory}`;
                     }
@@ -83,45 +83,118 @@ const Page = () => {
         setSelectedSubcategory(e.target.value);
     };
 
+    const handleCategoryExpand = (categoryId) => {
+        // Toggle category expansion
+        setExpandedCategory((prev) => (prev === categoryId ? null : categoryId));
+        // Automatically select the category if it is expanded
+        if (expandedCategory !== categoryId) {
+            setSelectedCategory(categoryId);
+        }
+    };
+
     return (
         <section>
             <PageHeading siteTitle={"Categories"} />
             <div className="w-10/12 mx-auto py-2 md:py-4">
                 <div className="flex flex-wrap md:flex-nowrap gap-4">
                     <div className="w-full md:w-1/4 md:sticky md:top-24 h-fit">
-                        <div className="w-full bg-white rounded-md px-4 py-6 h-fit relative">
-                            {/* Category Filter */}
-                            <p className="text-[#b12b29] font-semibold text-xs md:text-sm pb-2">Filter By Category</p>
-                            <select
-                                value={selectedCategory || ""}
-                                onChange={handleCategoryChange}
-                                className="w-full p-2 border rounded-md"
-                            >
-                                <option value="" disabled>Select a category</option>
+                        {showAllCategories ? (
+                            <div className="w-full bg-white rounded-md px-4 py-6 h-fit relative">
+                                <p className="text-[#b12b29] font-semibold text-xs md:text-sm pb-2">
+                                    All Categories
+                                </p>
                                 {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
+                                    <div key={category.id} className="mb-4">
+                                        <div
+                                            className="flex items-center justify-between cursor-pointer"
+                                            onClick={() => handleCategoryExpand(category.id)}
+                                        >
+                                            <span className="font-semibold">{category.name}</span>
+                                            <span>
+                                                {expandedCategory === category.id ? "-" : "+"}
+                                            </span>
+                                        </div>
+                                        {expandedCategory === category.id && (
+                                            <div className="pl-4 pt-2">
+                                                {subcategories
+                                                    .map((subCategory) => (
+                                                        <div key={subCategory.id} className="py-1">
+                                                            <span
+                                                                className="text-sm text-gray-700 cursor-pointer"
+                                                                onClick={() => setSelectedSubcategory(subCategory.id)}
+                                                            >
+                                                                {subCategory.name}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
-                            </select>
+                                <button
+                                    className="px-4 w-full py-2 mt-4 rounded-md bg-[#b12b29] text-white"
+                                    onClick={() => setShowAllCategories(false)}
+                                >
+                                    Back to Filter View
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="w-full bg-white rounded-md px-4 py-6 h-fit relative">
+                                <p className="text-[#b12b29] font-semibold text-xs md:text-sm pb-2">
+                                    Filter By Category
+                                </p>
+                                <select
+                                    value={selectedCategory || ""}
+                                    onChange={handleCategoryChange}
+                                    className="w-full p-2 border rounded-md"
+                                >
+                                    <option value="" disabled>
+                                        Select a category
+                                    </option>
+                                    {categories.map((category) => (
+                                        <option key={category.id} value={category.id}>
+                                            {category.name}
+                                        </option>
+                                    ))}
+                                </select>
 
-                            <p className="text-[#b12b29] font-semibold text-xs md:text-sm py-2 mt-4">
-                                Filter By Subcategory
-                            </p>
-                            <select
-                                value={selectedSubcategory || ""}
-                                onChange={handleSubCategoryChange}
-                                className="w-full p-2 border rounded-md"
-                                disabled={!selectedCategory}
-                            >
-                                <option value="" disabled>
-                                    {selectedCategory ? "Select a subcategory" : "Select a category first"}
-                                </option>
-                                {subcategories.map((subCategory) => (
-                                    <option key={subCategory.id} value={subCategory.id}>{subCategory.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                                <p className="text-[#b12b29] font-semibold text-xs md:text-sm py-2 mt-4">
+                                    Filter By Subcategory
+                                </p>
+                                <select
+                                    value={selectedSubcategory || ""}
+                                    onChange={handleSubCategoryChange}
+                                    className="w-full p-2 border rounded-md"
+                                    disabled={!selectedCategory}
+                                >
+                                    <option value="" disabled>
+                                        {selectedCategory
+                                            ? "Select a subcategory"
+                                            : "Select a category first"}
+                                    </option>
+                                    {subcategories.map((subCategory) => (
+                                        <option key={subCategory.id} value={subCategory.id}>
+                                            {subCategory.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+
+                        {!showAllCategories && (
+                            <div className="rounded bg-black text-white mt-4">
+                                <div className="p-4">
+                                    <p className="text-lg font-bold mb-4">Confused on What To Buy?</p>
+                                    <button
+                                        className="px-4 w-full py-2 rounded-md bg-[#b12b29]"
+                                        onClick={() => setShowAllCategories(true)}
+                                    >
+                                        View Our Catalogue
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    {/* Product Cards */}
                     <div className="w-full md:w-3/4">
                         <ProductCards parts={filteredParts} />
                     </div>

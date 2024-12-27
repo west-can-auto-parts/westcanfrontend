@@ -1,23 +1,22 @@
 import React from 'react'
 
-export const Grid1Layout = ({products, handleClick, stringToSlug }) => {
+export const Grid1Layout = ({ products, handleClick, stringToSlug }) => {
   return (
     <div className="grid grid-cols-1 gap-4">
     {products.map((part, index) => (
       <div
         key={index}
-        onClick={handleClick(stringToSlug(part.listing))}
         className="bg-white p-4 hover:shadow-md hover:scale-105 transition border border-gray-100 flex items-center gap-2 md:gap-4"
       >
         <img
-          src={part.imageUrl1}
-          alt={part.listing}
+          src={part.imageUrl[0]}
+          alt={part.description}
           className="w-24 md:w-48 h-24 md:h-48 object-contain"
         />
         <div>
         <div className='flex flex-col justify-center '>
-        <h3 className="font-semibold mb-2 text-left text-sm md:text-xl">{part.listing}</h3>
-        <p className="text-gray-500 text-left text-sm line-clamp-2">{part.content}</p>
+        <h3 className="font-semibold mb-2 text-left text-sm md:text-xl">{part.name}</h3>
+        <p className="text-gray-500 text-left text-sm line-clamp-2">{part.description}</p>
 
 
 
