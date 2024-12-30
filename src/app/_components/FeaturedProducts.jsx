@@ -9,15 +9,20 @@ import { useRouter } from 'next/navigation';
 import { Autoplay, Navigation, Pagination, Scrollbar } from 'swiper/modules';
 
 // import 'swiper/css/navigation';
-import 'swiper/css/pagination'; 
+import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 import 'swiper/css/autoplay'
 
+const isProduction = process.env.NODE_ENV === 'production';
+const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
+
 // Sample API data (replace with your actual API call)
 const fetchProducts = async () => {
-    const response = await fetch('/api/featured-products'); // Adjust API endpoint
+    const response = await fetch(`${apiUrl}/bestsellingproduct`); // Adjust API endpoint
     const data = await response.json();
-    return data.featuredProducts;
+    return data;
 };
 
 const FeaturedProducts = () => {
@@ -42,10 +47,10 @@ const FeaturedProducts = () => {
     }, []);
 
     return (
-        <section className='bg-white py-4 md:py-12'>
+        <section className="bg-white py-4 md:py-12">
             <div className="w-10/12 mx-auto py-4">
                 <div className="flex flex-wrap lg:flex-nowrap justify-between pb-2 border-[#00000010]">
-                    <p className='text-lg md:text-2xl font-bold pb-4'>Our Best Selling Products</p>
+                    <p className="text-lg md:text-2xl font-bold pb-4">Our Best Selling Products</p>
                 </div>
 
                 {/* Display the spinner while loading */}
@@ -61,8 +66,8 @@ const FeaturedProducts = () => {
                             slidesPerView={2}
                             pagination={{ clickable: true }}
                             autoplay={{
-                                delay: 3000, // 3 seconds delay
-                                disableOnInteraction: false, // Keeps autoplay running even after interaction
+                                delay: 3000,
+                                disableOnInteraction: false,
                             }}
                             navigation
                             breakpoints={{
@@ -81,28 +86,42 @@ const FeaturedProducts = () => {
                                 },
                             }}
                         >
-                            {autoParts.map(product => (
-                                <SwiperSlide key={product._id} className="py-4 h-full" onClick={() => router.push(`/product-view/${product._id}`)}>
-                                    <div className="bg-white shadow-md rounded 
-                                    h-full group transition duration-300">
+                            {autoParts.map((product) => (
+                                <SwiperSlide key={product._id} className="py-4 h-full">
+                                    <div className="bg-white shadow-md rounded h-full group transition duration-300">
+                                        {/* Image is not clickable */}
                                         <img
-                                            src={product.imageUrls[0]}
-                                            alt={product.description}
+                                            src={product.imageUrl[0]}
+                                            alt={product.name}
                                             className="w-full h-[15vh] object-cover mb-4 rounded"
                                         />
                                         <div className="p-3 group-hover:bg-gray-100/75">
-                                            <h3 className="text-md md:text-md font-semibold mb-2">{product.description}</h3>
-                                            <p className="text-gray-600 mb-2 hidden md:block text-xs !line-clamp-3 overflow-hidden">
-                                                {product.extendedDescription}
+                                            <h3
+                                                className="text-md md:text-md font-semibold mb-2 cursor-pointer"
+                                                onClick={() => router.push(`/product-view/${product._id}`)}
+                                            >
+                                                {product.name}
+                                            </h3>
+                                            <p
+                                                className="text-gray-600 mb-2 hidden md:block text-xs line-clamp-3 overflow-hidden cursor-pointer"
+                                                style={{
+                                                    display: "-webkit-box",
+                                                    WebkitBoxOrient: "vertical",
+                                                    WebkitLineClamp: 3,
+                                                    overflow: "hidden",
+                                                }}
+                                                onClick={() => router.push(`/product-view/${product._id}`)}
+                                            >
+                                                {product.description}
                                             </p>
                                             <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
-                                                <button className="flex items-center gap-1 transition text-xs py-1 rounded-md hover:text-[#b21b29]">
+                                                <button
+                                                    className="flex items-center gap-1 transition text-xs py-1 rounded-md hover:text-[#b21b29]"
+                                                    onClick={() => router.push(`/product-view/${product._id}`)}
+                                                >
                                                     <FaCartShopping className="w-4 h-4 transition-all duration-300 rounded-full" />
                                                     Shop Now
                                                 </button>
-                                                <div className="bg-gray-100 justify-center rounded-full text-[#b21b19] w-5 h-5 flex items-center text-lg transition-all duration-300 group-hover:bg-[#b21b29] group-hover:text-white">
-                                                    <FaMagnifyingGlass className="w-3 h-3" />
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -113,6 +132,7 @@ const FeaturedProducts = () => {
                 )}
             </div>
         </section>
+
     );
 };
 
