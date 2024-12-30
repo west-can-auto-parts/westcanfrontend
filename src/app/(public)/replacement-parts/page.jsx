@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import { ProductCards } from "./_components/product-cards";
 import { PageHeading } from "@/components/page-heading";
 
-const apiUrl = "http://localhost:8080/api/product";
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
 
 const Page = () => {
   const [categories, setCategories] = useState([]);

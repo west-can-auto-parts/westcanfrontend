@@ -13,9 +13,14 @@ import { AboutPart } from "./_components/about-part";
 import { PartSupplier } from "./_components/part-supplier";
 import { PartTags } from "./_components/part-tags";
 
-const apiUrl = "http://localhost:8080/api/product";
-const apiUrl2 = 'http://localhost:8080/api/suppliers';
 
+const isProduction = process.env.NODE_ENV === 'production';
+const apiUrl1 = isProduction
+  ? 'https://frontendbackend-production.up.railway.app/'
+  : 'http://localhost:8080/admin/api';
+
+const apiUrl = apiUrl1+'api/product';
+const apiUrl2 = apiUrl1+'api/suppliers';
 const Page = ({ params }) => {
   const [myProduct, setMyProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,7 +29,7 @@ const Page = ({ params }) => {
   const [subCategory, setSubCategory] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [categoryType, setCategoryType] = useState("");
-    const [categorySlug, setCategorySlug] = useState("");
+  const [categorySlug, setCategorySlug] = useState("");
 
   const router = useRouter();
   const slug = params.category;
@@ -184,7 +189,7 @@ const Page = ({ params }) => {
           {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {myProduct?.map((product, index) => (
-              <div key={index} className="cursor-pointer" onClick={() => handleClick(product.name,product.categoryName)}>
+              <div key={index} className="cursor-pointer" onClick={() => handleClick(product.name, product.categoryName)}>
                 <div className="bg-white shadow-md rounded h-full flex flex-col justify-between group">
                   <div>
                     <img

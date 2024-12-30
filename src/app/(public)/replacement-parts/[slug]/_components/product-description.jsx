@@ -5,8 +5,10 @@ import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
 import React, { useState } from 'react';
 import locations from '@/datas/store';
 
-const apiUrl = 'http://localhost:8080/api/product/productenquiry';
-
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product/productenquiry'
+    : 'http://localhost:8080/api/product/productenquiry';
 export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
     const [error, setError] = useState(null);

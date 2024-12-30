@@ -4,7 +4,10 @@ import React, { useState, useEffect } from "react";
 import { ProductCards } from "./_components/product-cards";
 import { PageHeading } from "@/components/page-heading";
 
-const apiUrl = "http://localhost:8080/api/product";
+const isProduction = process.env.NODE_ENV === 'production';
+const apiUrl = isProduction
+  ? 'https://frontendbackend-production.up.railway.app/api/product'
+  : 'http://localhost:8080/api/product';
 
 const Page = () => {
   const [categories, setCategories] = useState([]);
@@ -33,57 +36,57 @@ const Page = () => {
     fetchCategories();
   }, []);
 
-   useEffect(() => {
-          const fetchSubcategories = async () => {
-              if (selectedCategory) {
-                  try {
-                      const response = await fetch(`${apiUrl}/subcategory/category/${selectedCategory}`);
-                      const data = await response.json();
-                      setSubcategories(data);
-                  } catch (error) {
-                      console.error("Error fetching subcategories:", error);
-                  }
-              } else {
-                  setSubcategories([]);
-              }
-          };
-          fetchSubcategories();
-      }, [selectedCategory]);
-  
-      // Fetch filtered parts whenever filters change
-      useEffect(() => {
-        const fetchFilteredParts = async () => {
-            try {
-                let url = `${apiUrl}/product-category`;
-    
-                if (!selectedCategory && !selectedSubcategory) {
-                    // Call the endpoint to fetch all products when no filters are applied
-                    url = `${apiUrl}/product-category/category/${"Tools & Equipments"}`;
-                } else {
-                    if (selectedCategory) {
-                        url += `?category=${selectedCategory}`;
-                    }
-    
-                    if (selectedSubcategory) {
-                        // If a subcategory is selected, append it
-                        url += `&subcategory=${selectedSubcategory}`;
-                    }
-                }
-    
-                const response = await fetch(url);
-                const data = await response.json();
-                setFilteredParts(data);
-            } catch (error) {
-                console.error("Error fetching filtered parts:", error);
-            }
-        };
-        fetchFilteredParts();
-    }, [selectedCategory, selectedSubcategory]);
-    
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (selectedCategory) {
+        try {
+          const response = await fetch(`${apiUrl}/subcategory/category/${selectedCategory}`);
+          const data = await response.json();
+          setSubcategories(data);
+        } catch (error) {
+          console.error("Error fetching subcategories:", error);
+        }
+      } else {
+        setSubcategories([]);
+      }
+    };
+    fetchSubcategories();
+  }, [selectedCategory]);
 
-const handleSubCategoryChange = (e) => {
+  // Fetch filtered parts whenever filters change
+  useEffect(() => {
+    const fetchFilteredParts = async () => {
+      try {
+        let url = `${apiUrl}/product-category`;
+
+        if (!selectedCategory && !selectedSubcategory) {
+          // Call the endpoint to fetch all products when no filters are applied
+          url = `${apiUrl}/product-category/category/${"Tools & Equipments"}`;
+        } else {
+          if (selectedCategory) {
+            url += `?category=${selectedCategory}`;
+          }
+
+          if (selectedSubcategory) {
+            // If a subcategory is selected, append it
+            url += `&subcategory=${selectedSubcategory}`;
+          }
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+        setFilteredParts(data);
+      } catch (error) {
+        console.error("Error fetching filtered parts:", error);
+      }
+    };
+    fetchFilteredParts();
+  }, [selectedCategory, selectedSubcategory]);
+
+
+  const handleSubCategoryChange = (e) => {
     setSelectedSubcategory(e.target.value);
-};
+  };
 
 
 
@@ -118,21 +121,21 @@ const handleSubCategoryChange = (e) => {
 
               {/* Subcategory Filter */}
               <p className="text-[#b12b29] font-semibold text-xs md:text-sm py-2 mt-4">
-                                Filter By Subcategory
-                            </p>
-                            <select
-                                value={selectedSubcategory || ""}
-                                onChange={handleSubCategoryChange}
-                                className="w-full p-2 border rounded-md"
-                                disabled={!selectedCategory}
-                            >
-                                <option value="" disabled>
-                                    {selectedCategory ? "Select a subcategory" : "Select a category first"}
-                                </option>
-                                {subcategories.map((subCategory) => (
-                                    <option key={subCategory.id} value={subCategory.id}>{subCategory.name}</option>
-                                ))}
-                            </select>
+                Filter By Subcategory
+              </p>
+              <select
+                value={selectedSubcategory || ""}
+                onChange={handleSubCategoryChange}
+                className="w-full p-2 border rounded-md"
+                disabled={!selectedCategory}
+              >
+                <option value="" disabled>
+                  {selectedCategory ? "Select a subcategory" : "Select a category first"}
+                </option>
+                {subcategories.map((subCategory) => (
+                  <option key={subCategory.id} value={subCategory.id}>{subCategory.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 

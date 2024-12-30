@@ -10,7 +10,10 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
   const [job, setJob] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const apiUrl = 'http://localhost:8080/api/jobs';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+    : 'http://localhost:8080/api/jobs';
   useEffect(() => {
     async function fetchJob() {
       if (id) {

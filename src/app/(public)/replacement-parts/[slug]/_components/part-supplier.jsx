@@ -13,8 +13,10 @@ export const PartSupplier = ({ subCategoryName }) => {
 
   console.log('mySubPart: ',subCategoryName);
 
-  const apiUrl = 'http://localhost:8080/api/suppliers';
-
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/suppliers'
+    : 'http://localhost:8080/admin/api';
   // Fetch suppliers by product category from the backend
   useEffect(() => {
     if (!currentListing) return;

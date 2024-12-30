@@ -11,7 +11,10 @@ const icons = {
     "Delivery Driver - Langley": <FaTruck />,
     // Add more job titles and icons as needed
 };
-const apiUrl = 'http://localhost:8080/api/jobs';
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+    : 'http://localhost:8080/api/jobs';
 const AvailableJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [openIndex, setOpenIndex] = useState(null);
