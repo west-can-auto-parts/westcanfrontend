@@ -17,7 +17,7 @@ import { PartTags } from "./_components/part-tags";
 const isProduction = process.env.NODE_ENV === 'production';
 const apiUrl1 = isProduction
   ? 'https://frontendbackend-production.up.railway.app/'
-  : 'http://localhost:8080/admin/api';
+  : 'http://localhost:8080/';
 
 const apiUrl = apiUrl1+'api/product';
 const apiUrl2 = apiUrl1+'api/suppliers';
