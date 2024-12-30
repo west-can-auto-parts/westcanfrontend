@@ -14,7 +14,7 @@ const AdminCategoriesPage = () => {
 
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://admin-pznr.onrender.com/admin/api'
+    ? 'https://adminbackend-production-6c17.up.railway.app/admin/api'
     : 'http://localhost:8081/admin/api';
 
   useEffect(() => {
