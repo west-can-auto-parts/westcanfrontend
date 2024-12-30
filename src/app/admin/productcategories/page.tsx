@@ -69,7 +69,7 @@ const ProductCategoriesPage = () => {
 
   // Handle delete category
   const handleDelete = async (id: string) => {
-    const res = await fetch(`${apiUrl}/product-category/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${apiUrl}/product-category/delete${id}`, { method: 'DELETE' });
 
     if (res.ok) {
       setProductCategories(productCategories.filter((category) => category.id !== id));

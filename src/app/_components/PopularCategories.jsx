@@ -10,7 +10,7 @@ import { CgShoppingCart } from 'react-icons/cg';
 import { useRouter } from 'next/navigation';
 
 const isProduction = process.env.NODE_ENV === 'production';
-  const apiUrl = isProduction
+const apiUrl = isProduction
     ? 'https://frontendbackend-production.up.railway.app/api/product'
     : 'http://localhost:8080/api/product';
 // const fetchCategories = async () => {
@@ -20,13 +20,13 @@ const isProduction = process.env.NODE_ENV === 'production';
 // };
 
 const fetchCategory = async () => {
-    const response = await fetch(`${apiUrl}/categories`);
+    const response = await fetch(`${apiUrl}/category`);
     const data = await response.json();
     return data;
 };
 
 const fetchSubCategory = async () => {
-    const response = await fetch(`${apiUrl}/subcategories`);
+    const response = await fetch(`${apiUrl}/subcategory`);
     const data = await response.json();
     return data;
 };
@@ -39,15 +39,6 @@ const PopularCategories = () => {
     const router = useRouter();
 
     useEffect(() => {
-        // const getData = async () => {
-        //     try {
-        //         const fetchedCategories = await fetchCategories();
-        //         setCategories(fetchedCategories);
-        //     } catch (error) {
-        //         console.error('Error fetching categories:', error);
-        //     }
-        // };
-
         const getCategories = async () => {
             try {
                 const fetchedCategories = await fetchCategory();
@@ -71,10 +62,13 @@ const PopularCategories = () => {
         //getData();
     }, []);
 
+    console.log(subCats)
+
     const sideMenu = cats.map(cat => ({
         title: cat.name,
-        items: subCats.filter(subCat => subCat.parentId === cat.id).map(subCat => subCat.name),
-        imgUrl: cat.images[0] || "default_image_url.jpg",
+        items: subCats.filter(subCat => subCat.categoryName
+            === cat.name).map(subCat => subCat.name),
+        imgUrl: cat.imageUrl[0] || "default_image_url.jpg",
         id: cat.id, // Store the category ID for use in the Swiper
     }));
 
@@ -120,14 +114,17 @@ const PopularCategories = () => {
                                 <div className='h-full overflow-hidden'>
                                     <p className="text-xl font-bold mb-2">{menu.title}</p>
                                     <div className='overflow-y-auto max-h-[300px]'>
-                                        <ul className='list-none flex flex-col gap-y-1'>
+                                        <ul
+                                            className={`flex flex-col gap-2 pt-4 max-h-[300px] overflow-hidden ${menu.items.length > 10 ? 'hover:overflow-y-scroll' : ''
+                                                }`}
+                                            style={{ scrollBehavior: "smooth" }}
+                                        >
                                             {menu.items.map((item, index) => (
                                                 <li key={index}>
-                                                    <Link href={
-                                                        menu.title === "Replacement Parts" || menu.title === "Fluids & Lubricants"
-                                                            ? `/shop/${stringToSlug(item)}`
-                                                            : `/shop/${stringToSlug(item)}`
-                                                    } className="block p-1 text-white rounded hover:bg-[#b21b29] transition duration-300 text-xs">
+                                                    <Link
+                                                        href={`/shop/${stringToSlug(item)}`}
+                                                        className="block p-1 text-white rounded hover:bg-[#b21b29] transition duration-300 text-xs"
+                                                    >
                                                         {item}
                                                     </Link>
                                                 </li>
@@ -136,17 +133,17 @@ const PopularCategories = () => {
                                     </div>
                                 </div>
                                 <Link href={
-                                                            menu.title === "Replacement Parts" || menu.title === "Fluids & Lubricants"
-                                                                ? `/replacement-parts`
-                                                                : `/shop-supplies`
-                                                        }>
-                                                             <button className='mt-3 text-xs text-white bg-[#b12b29] px-4 py-2'>Shop All</button>
-                                                        </Link>
-                               
+                                    menu.title === "Replacement Parts" || menu.title === "Fluids & Lubricants"
+                                        ? `/replacement-parts`
+                                        : `/shop-supplies`
+                                }>
+                                    <button className='mt-3 text-xs text-white bg-[#b12b29] px-4 py-2'>Shop All</button>
+                                </Link>
+
                             </div>
                         </div>
                         <div className='w-full lg:w-4/5'>
-                            {subCats.some(cat => cat.parentId === menu.id) && (
+                            {subCats.some(cat => cat.categoryName === menu.title) && (
                                 <Swiper
                                     spaceBetween={12}
                                     slidesPerView={1}
@@ -160,18 +157,18 @@ const PopularCategories = () => {
                                         1280: { slidesPerView: 3, spaceBetween: 8 },
                                     }}
                                 >
-                                    {subCats.filter(subCat => subCat.parentId === menu.id).map(product => (
-                                        <SwiperSlide key={product._id} className="py-6 md:py-2 h-full">
-                                            <div className="bg-white shadow-md rounded h-full group transition"  onClick={() => router.push(`/shop/${stringToSlug(product.name)}`)}>
-                                                <img src={product.images[0] || "https://via.placeholder.com/250"} alt={product.title} className="w-full h-[25vh] object-contain mb-4 rounded" />
+                                    {subCats.filter(subCat => subCat.categoryName === menu.title).map(product => (
+                                        <SwiperSlide key={product.id} className="py-6 md:py-2 h-full">
+                                            <div className="bg-white shadow-md rounded h-full group transition" onClick={() => router.push(`/shop/${encodeURI(product.name)}`)}>
+                                                <img src={product.images[0] || "https://via.placeholder.com/250"} alt={product.name} className="w-full h-[25vh] object-contain mb-4 rounded" />
                                                 <div className="p-4">
                                                     <h3 className="text-lg font-semibold mb-2 text-[#b21b29]">{product.name}</h3>
                                                     <p className="text-sm text-gray-600 mb-2 line-clamp-3">{product.description}</p>
                                                     <div className="flex justify-between items-center mt-4">
                                                         <Link className='text-sm bg-[#b21b29] px-2 py-1 text-white rounded-md font-semibold flex gap-2 items-center' href={
-                                                            menu.title === "Replacement Parts" || menu.title === "Fluids & Lubricants"
-                                                                ? `/shop/${stringToSlug(product.name)}`
-                                                                : `/shop/${stringToSlug(product.name)}`
+                                                            menu.name === "Replacement Parts" || menu.name === "Fluids & Lubricants"
+                                                                ? `/shop/${encodeURI(product.name)}`
+                                                                : `/shop/${encodeURI(product.name)}`
                                                         } >
                                                             <CgShoppingCart /> Shop Now
                                                         </Link>
