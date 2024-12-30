@@ -68,7 +68,7 @@ const PopularCategories = () => {
         title: cat.name,
         items: subCats.filter(subCat => subCat.categoryName
             === cat.name).map(subCat => subCat.name),
-        imgUrl: cat.imageUrl[0] || "default_image_url.jpg",
+        imgUrl: Array.isArray(cat.imageUrl) && cat.imageUrl.length > 0 ? cat.imageUrl[0]: "default_image_url.jpg",
         id: cat.id, // Store the category ID for use in the Swiper
     }));
 
