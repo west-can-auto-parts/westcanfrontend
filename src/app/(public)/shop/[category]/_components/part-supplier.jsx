@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export const PartSupplier = ({ suppliers, mySubPart }) => {
+export const PartSupplier = ({ suppliers}) => {
     const [showMore, setShowMore] = useState(false);
     const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 

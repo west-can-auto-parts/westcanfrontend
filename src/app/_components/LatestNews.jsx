@@ -7,11 +7,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
-
 import suppliers from '@/datas/suppliers';
 
-
-const apiUrl = 'http://localhost:8080/api/blog';
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/blog'
+    : 'http://localhost:8080/api/blog';
 const fetchBlogs = async () => {
     const response = await fetch(apiUrl);
     const data = await response.json();

@@ -22,7 +22,10 @@ const JobApplicationForm = ({ params }) => {
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(true);
     const [previewUrl, setPreviewUrl] = useState('')
-    const apiUrl = 'http://localhost:8080/api/jobs';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+        ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+        : 'http://localhost:8080/api/jobs';
     useEffect(() => {
         // Fetch job details based on jobId
         const fetchJobDetails = async () => {
@@ -84,14 +87,14 @@ const JobApplicationForm = ({ params }) => {
     if (loading) return <p>Loading job details...</p>;
 
     return (
-        <div className="w-full mx-auto flex flex-wrap md:flex-nowrap bg-cover bg-no-repeat bg-left" style={{backgroundImage:`url(https://res.cloudinary.com/dpeocx0yy/image/upload/v1726811584/2149580614_kasfg1.jpg)`}}>
-          
+        <div className="w-full mx-auto flex flex-wrap md:flex-nowrap bg-cover bg-no-repeat bg-left" style={{ backgroundImage: `url(https://res.cloudinary.com/dpeocx0yy/image/upload/v1726811584/2149580614_kasfg1.jpg)` }}>
+
 
             {/* Display selected job details */}
             <div className="w-full md:w-1/2 p-4 md:p-12 bg-[#000000d6] text-white">
-            <h1 className="text-2xl font-bold mb-6">Job Application</h1>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {success && <p className="text-green-500 mb-4">{success}</p>}
+                <h1 className="text-2xl font-bold mb-6">Job Application</h1>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {success && <p className="text-green-500 mb-4">{success}</p>}
                 {jobDetails && (
                     <div className="mb-8  rounded-lg">
                         <h2 className="text-lg font-bold mb-2">{jobDetails.jobTitle}</h2>

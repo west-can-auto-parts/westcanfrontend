@@ -8,7 +8,10 @@ const JobsPage = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const apiUrl = 'http://localhost:8080/api/jobs';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+    : 'http://localhost:8080/api/jobs';
   useEffect(() => {
     async function fetchJobs() {
       try {

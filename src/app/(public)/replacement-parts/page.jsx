@@ -1,179 +1,152 @@
 "use client";
 
-import React, { useState } from 'react';
-import parts from '@/datas/catalogue';
-import { ProductCards } from './_components/product-cards';
-import { PageHeading } from '@/components/page-heading';
+import React, { useState, useEffect } from "react";
+import { ProductCards } from "./_components/product-cards";
+import { PageHeading } from "@/components/page-heading";
+
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
 
 const Page = () => {
-    const options = parts.filter(part => part.title === "Replacement Parts" || part.title === "Fluids & Lubricants");
-    const [filteredParts, setFilteredParts] = useState(options);
-    const [selectedCategories, setSelectedCategories] = useState([]);
-    const [selectedSubCategories, setSelectedSubCategories] = useState([]);
-    const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-    const [subcategoryDropdownOpen, setSubcategoryDropdownOpen] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [filteredParts, setFilteredParts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
 
-    // Handle Category Selection
-    const handleCategoryChange = (category) => {
-        setSelectedCategories(prev => {
-            const isSelected = prev.includes(category);
-            if (isSelected) {
-                return prev.filter(cat => cat !== category);
-            } else {
-                return [...prev, category];
-            }
-        });
-    };
-
-    // Handle Subcategory Selection
-    const handleSubCategoryChange = (subCategory) => {
-        setSelectedSubCategories(prev => {
-            const isSelected = prev.includes(subCategory);
-            if (isSelected) {
-                return prev.filter(subCat => subCat !== subCategory);
-            } else {
-                return [...prev, subCategory];
-            }
-        });
-    };
-
-    // Filter parts based on selected categories and subcategories
-    const filterParts = () => {
-        const categoryFilteredParts = options.filter(part =>
-            selectedCategories.length === 0 || selectedCategories.includes(part.title)
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${apiUrl}/category`);
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
+        const filteredCategories = data.filter(
+          (category) =>
+            category.name === "Replacement Parts" ||
+            category.name === "Fluids & Lubricants"
         );
-
-        const finalFilteredParts = categoryFilteredParts.map(part => ({
-            ...part,
-            subParts: part.subParts.filter(subPart =>
-                selectedSubCategories.length === 0 || selectedSubCategories.includes(subPart.listing)
-            )
-        })).filter(part => part.subParts.length > 0);
-
-        setFilteredParts(finalFilteredParts);
+        setCategories(filteredCategories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
     };
 
-    // Update filtered parts when categories or subcategories change
-    React.useEffect(() => {
-        filterParts();
-    }, [selectedCategories, selectedSubCategories]);
+    fetchCategories();
+  }, []);
 
-    return (
-        <section>
-            <PageHeading siteTitle={"Replacement Parts"} />
-            <div className='w-10/12 mx-auto py-2 md:py-4'>
-                <div className='flex flex-wrap md:flex-nowrap gap-4'>
-                    <div className="w-full md:w-1/4 md:sticky md:top-24 h-fit">
-                        <div className="w-full bg-white rounded-md px-4 py-6 h-fit relative">
-                            {/* Category Filter */}
-                            <p className="text-[#b12b29] font-semibold text-xs md:text-sm pb-2">Filter By Category</p>
-                            {/* Desktop Checkboxes */}
-                            <div className="hidden md:block space-y-2">
-                                {options.map(part => (
-                                    <label key={part.title} className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCategories.includes(part.title)}
-                                            onChange={() => handleCategoryChange(part.title)}
-                                            className="form-checkbox"
-                                        />
-                                        <span>{part.title}</span>
-                                    </label>
+   useEffect(() => {
+          const fetchSubcategories = async () => {
+              if (selectedCategory) {
+                  try {
+                      const response = await fetch(`${apiUrl}/subcategory/category/${selectedCategory}`);
+                      const data = await response.json();
+                      setSubcategories(data);
+                  } catch (error) {
+                      console.error("Error fetching subcategories:", error);
+                  }
+              } else {
+                  setSubcategories([]);
+              }
+          };
+          fetchSubcategories();
+      }, [selectedCategory]);
+  
+      // Fetch filtered parts whenever filters change
+      useEffect(() => {
+        const fetchFilteredParts = async () => {
+            try {
+                let url = `${apiUrl}/product-category`;
+    
+                if (!selectedCategory && !selectedSubcategory) {
+                    // Call the endpoint to fetch all products when no filters are applied
+                    url = `${apiUrl}/product-category/category/${"Replacement Parts"}`;
+                } else {
+                    if (selectedCategory) {
+                        url += `?category=${selectedCategory}`;
+                    }
+    
+                    if (selectedSubcategory) {
+                        // If a subcategory is selected, append it
+                        url += `&subcategory=${selectedSubcategory}`;
+                    }
+                }
+    
+                const response = await fetch(url);
+                const data = await response.json();
+                setFilteredParts(data);
+            } catch (error) {
+                console.error("Error fetching filtered parts:", error);
+            }
+        };
+        fetchFilteredParts();
+    }, [selectedCategory, selectedSubcategory]);
+    
+
+const handleSubCategoryChange = (e) => {
+    setSelectedSubcategory(e.target.value);
+};
+
+
+
+  return (
+    <section>
+      <PageHeading siteTitle="Replacement Parts" />
+      <div className="w-10/12 mx-auto py-2 md:py-4">
+        <div className="flex flex-wrap md:flex-nowrap gap-4">
+          <div className="w-full md:w-1/4 md:sticky md:top-24 h-fit">
+            <div className="w-full bg-white rounded-md px-4 py-6 h-fit relative">
+              {/* Category Filter */}
+              <p className="text-[#b12b29] font-semibold text-xs md:text-sm pb-2">
+                Filter By Category
+              </p>
+              <select
+                value={selectedCategory || ""}
+                onChange={(e) => {
+                  setSelectedCategory(e.target.value);
+                  setSelectedSubcategory(""); // Reset subcategory on category change
+                }}
+                className="w-full p-2 border rounded-md"
+              >
+                <option value="" disabled>
+                  Select a category
+                </option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+
+              {/* Subcategory Filter */}
+              <p className="text-[#b12b29] font-semibold text-xs md:text-sm py-2 mt-4">
+                                Filter By Subcategory
+                            </p>
+                            <select
+                                value={selectedSubcategory || ""}
+                                onChange={handleSubCategoryChange}
+                                className="w-full p-2 border rounded-md"
+                                disabled={!selectedCategory}
+                            >
+                                <option value="" disabled>
+                                    {selectedCategory ? "Select a subcategory" : "Select a category first"}
+                                </option>
+                                {subcategories.map((subCategory) => (
+                                    <option key={subCategory.id} value={subCategory.id}>{subCategory.name}</option>
                                 ))}
-                            </div>
-                            {/* Mobile Dropdown */}
-                            <div className="md:hidden">
-                                <button
-                                    className="w-full bg-white border border-gray-300 rounded-md shadow-sm p-2"
-                                    onClick={() => setCategoryDropdownOpen(!categoryDropdownOpen)}
-                                >
-                                    {selectedCategories.length > 0 ? selectedCategories.join(', ') : 'Select Category'}
-                                </button>
-                                {categoryDropdownOpen && (
-                                    <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg">
-                                        {options.map(part => (
-                                            <div
-                                                key={part.title}
-                                                className="p-2 hover:bg-gray-100 cursor-pointer"
-                                                onClick={() => {
-                                                    handleCategoryChange(part.title);
-                                                    setCategoryDropdownOpen(false);
-                                                }}
-                                            >
-                                                {part.title}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Subcategory Filter */}
-                            <p className="text-[#b12b29] font-semibold text-xs md:text-sm py-2 mt-4">Filter By Subcategory:</p>
-                            {/* Desktop Checkboxes */}
-                            <div className="hidden md:block max-h-[50vh] overflow-y-auto space-y-2">
-                                {options
-                                    .filter(part => selectedCategories.includes(part.title) || selectedCategories.length === 0)
-                                    .flatMap(part => part.subParts)
-                                    .filter((subPart, index, self) => self.findIndex(sp => sp.listing === subPart.listing) === index) // Unique subparts
-                                    .map(subPart => (
-                                        <label key={subPart.listing} className="flex items-center space-x-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedSubCategories.includes(subPart.listing)}
-                                                onChange={() => handleSubCategoryChange(subPart.listing)}
-                                                className="form-checkbox"
-                                            />
-                                            <span>{subPart.listing}</span>
-                                        </label>
-                                    ))}
-                            </div>
-                            {/* Mobile Dropdown */}
-                            <div className="md:hidden">
-                                <button
-                                    className="w-full bg-white border border-gray-300 rounded-md shadow-sm p-2"
-                                    onClick={() => setSubcategoryDropdownOpen(!subcategoryDropdownOpen)}
-                                >
-                                    {selectedSubCategories.length > 0 ? selectedSubCategories.join(', ') : 'Select Sub-Category'}
-                                </button>
-                                {subcategoryDropdownOpen && (
-                                    <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-[50vh] overflow-y-auto">
-                                        {options
-                                            .filter(part => selectedCategories.includes(part.title) || selectedCategories.length === 0)
-                                            .flatMap(part => part.subParts)
-                                            .filter((subPart, index, self) => self.findIndex(sp => sp.listing === subPart.listing) === index) // Unique subparts
-                                            .map(subPart => (
-                                                <div
-                                                    key={subPart.listing}
-                                                    className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
-                                                    onClick={() => {
-                                                        handleSubCategoryChange(subPart.listing);
-                                                        setSubcategoryDropdownOpen(false);
-                                                    }}
-                                                >
-                                                    {subPart.listing}
-                                                </div>
-                                            ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="rounded bg-black text-white mt-4">
-                            <div className="p-4">
-                                <p className="text-lg font-bold mb-4">Confused on What To Buy?</p>
-                                <button className='px-4 w-full py-2 rounded-md bg-[#b12b29]'>View Our Catalogue</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Product Cards */}
-                    <div className="w-full md:w-3/4">
-                        <ProductCards parts={filteredParts} />
-                    </div>
-                </div>
+                            </select>
             </div>
-        </section>
-    );
+          </div>
+
+          {/* Product Cards */}
+          <div className="w-full md:w-3/4">
+            <ProductCards parts={filteredParts} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Page;
-

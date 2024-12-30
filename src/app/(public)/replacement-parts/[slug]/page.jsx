@@ -9,7 +9,6 @@ import { RelatedParts } from './_components/related-parts'
 import { BreadCrumbs } from './_components/head-links'
 import { PartSupplier } from './_components/part-supplier';
 
-
 const Page = ({ params }) => {
   const slug = params.slug;
   
@@ -29,8 +28,10 @@ const Page = ({ params }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [productId, setProductId] = useState(null);
-
-  const apiUrl = 'http://localhost:8080/api/product';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
 
 
   
@@ -55,7 +56,7 @@ const Page = ({ params }) => {
     };
 
     fetchProduct();
-  }, [productId, slug]); // Added `slug` as a dependency
+  }, [slug]); // Added `slug` as a dependency
 
   const determineCategory = (product) => {
     if (
@@ -89,7 +90,7 @@ const Page = ({ params }) => {
           categorySlug={categorySlug}
           categoryType={categoryType}
           parentCategory={myProduct.subCategoryName}
-          parentCategorySlug={stringToSlug(myProduct.subCategoryName)}
+          parentCategorySlug={encodeURIComponent(myProduct.subCategoryName)}
           productLising={myProduct.name}
           productSlug={stringToSlug(myProduct.name)}
         />

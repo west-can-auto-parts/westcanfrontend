@@ -2,23 +2,21 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaTh, FaThLarge, FaBars, FaList } from 'react-icons/fa'; 
+import { FaTh, FaThLarge, FaBars, FaList } from 'react-icons/fa';
 
-import {Grid4Layout} from './grid-4-layout'
-import {Grid3Layout} from './grid-3-layout'
-import {Grid1Layout} from './grid-1-layout'
-import {ListLayout} from './list-layout' 
+import { Grid4Layout } from './grid-4-layout'
+import { Grid3Layout } from './grid-3-layout'
+import { Grid1Layout } from './grid-1-layout'
+import { ListLayout } from './list-layout'
 
 
 export const ProductCards = ({ parts }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [productsPerPage, setProductsPerPage] = useState(12); // Default number of products per page
+  const [productsPerPage, setProductsPerPage] = useState(10); // Default number of products per page
   const [layout, setLayout] = useState('grid-4'); // Default layout is 4-column grid
 
-  // Flatten the parts array to get all sub parts
-  const allParts = parts
-    .flatMap(part => part.subParts)
-    .flatMap(subPart => subPart.parts);
+  // Directly use parts since it's already flat
+  const allParts = parts;
 
   // Calculate the index range of products to display based on the current page
   const indexOfLastProduct = currentPage * productsPerPage;
@@ -43,21 +41,6 @@ export const ProductCards = ({ parts }) => {
   const handleLayoutChange = (layout) => {
     setLayout(layout);
   };
-  const router = useRouter();
-
-  function stringToSlug(str) {
-    return str
-      .toLowerCase()                  // Convert the string to lowercase
-      .trim()                         // Remove any leading or trailing whitespace
-      .replace(/[^a-z0-9 -]/g, '')    // Remove all non-alphanumeric characters except for spaces and hyphens
-      .replace(/\s+/g, '-')           // Replace spaces and consecutive spaces with a single hyphen
-      .replace(/--+/g, '-');          // Replace multiple hyphens with a single hyphen
-  }
-
-  const handleClick = (listing) => {
-    const route = stringToSlug(listing);
-    router.push(`/shop-supplies/${route}`);
-  };
 
   return (
     <div>
@@ -73,9 +56,9 @@ export const ProductCards = ({ parts }) => {
           </button>
           <button
             onClick={() => handleLayoutChange('grid-3')}
-            className={`hidden md:grid p-2 ${layout === 'grid-3' ? 'bg-[#b12b29] text-white' : ''}`}
+            className={`p-2 ${layout === 'grid-3' ? 'bg-[#b12b29] text-white' : ''}`}
           >
-            <FaTh /> {/* 3 Column Layout */}
+           <FaTh /> {/* 3 Column Layout */}
           </button>
           <button
             onClick={() => handleLayoutChange('grid-1')}
@@ -85,9 +68,9 @@ export const ProductCards = ({ parts }) => {
           </button>
           <button
             onClick={() => handleLayoutChange('list')}
-            className={`hidden md:grid p-2 ${layout === 'list' ? 'bg-[#b12b29] text-white' : ''}`}
+            className={`p-2 ${layout === 'list' ? 'bg-[#b12b29] text-white' : ''}`}
           >
-            <FaList /> {/* Detailed List Layout */}
+             <FaList /> {/* Detailed List Layout */}
           </button>
         </div>
 
@@ -109,10 +92,10 @@ export const ProductCards = ({ parts }) => {
       </div>
 
       {/* Render appropriate layout */}
-      {layout === 'grid-4' && <Grid4Layout products={currentProducts} handleClick={handleClick} stringToSlug={stringToSlug} />}
-      {layout === 'grid-3' && <Grid3Layout products={currentProducts} handleClick={handleClick} stringToSlug={stringToSlug} />}
-      {layout === 'grid-1' && <Grid1Layout products={currentProducts} handleClick={handleClick} stringToSlug={stringToSlug} />}
-      {layout === 'list' && <ListLayout products={currentProducts} handleClick={handleClick} stringToSlug={stringToSlug} />}
+      {layout === 'grid-4' && <Grid4Layout products={currentProducts} />}
+      {layout === 'grid-3' && <Grid3Layout products={currentProducts} />}
+      {layout === 'grid-1' && <Grid1Layout products={currentProducts} />}
+      {layout === 'list' && <ListLayout products={currentProducts} />}
 
       {/* Pagination Controls */}
       <div className="w-full overflow-x-auto flex justify-start mt-4 space-x-2">

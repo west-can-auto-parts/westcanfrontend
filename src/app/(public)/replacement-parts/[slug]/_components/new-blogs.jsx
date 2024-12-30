@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link';
 
 export const NewBlogs = () => {
-    
+
     const [blogs, setBlogs] = useState([])
     const [loading, setLoading] = useState(true);
-    const apiUrl = 'http://localhost:8080/api/blog';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+        ? 'https://frontendbackend-production.up.railway.app/api/blog'
+        : 'http://localhost:8080/admin/api';
     useEffect(() => {
-        
+
 
         const fetchAllBlogs = async () => {
             try {
@@ -20,7 +23,7 @@ export const NewBlogs = () => {
             }
         }
 
-     
+
         fetchAllBlogs();
     }, []);
 

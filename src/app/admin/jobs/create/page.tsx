@@ -18,7 +18,10 @@ const CreateJobPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
-  const apiUrl = 'http://localhost:8080/api/jobs';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+    : 'http://localhost:8080/api/jobs';
 
   const handleCreate = async () => {
     try {

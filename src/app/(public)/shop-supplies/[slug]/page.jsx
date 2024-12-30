@@ -26,9 +26,10 @@ const Page = ({ params }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [productId, setProductId] = useState(null);
-
-  const apiUrl = 'http://localhost:8080/api/product';
-
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
 
   
   // Refetch product data when productId or slug changes

@@ -10,10 +10,10 @@ export const PartSupplier = ({ subCategoryName }) => {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   // Ensure `mySubPart` is valid and has the required property
   const currentListing = subCategoryName || "";
-
-  console.log('mySubPart: ',subCategoryName);
-
-  const apiUrl = 'http://localhost:8080/api/suppliers';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/suppliers'
+    : 'http://localhost:8080/api/suppliers';
 
   // Fetch suppliers by product category from the backend
   useEffect(() => {

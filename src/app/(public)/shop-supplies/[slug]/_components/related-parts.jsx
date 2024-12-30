@@ -17,7 +17,10 @@ export const RelatedParts = ({ subCategoryName }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const router = useRouter();
-    const apiUrl = 'http://localhost:8080/api/product';
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+        ? 'https://frontendbackend-production.up.railway.app/api/product'
+        : 'http://localhost:8080/api/product';
 
     useEffect(() => {
         const fetchRelatedProducts = async () => {

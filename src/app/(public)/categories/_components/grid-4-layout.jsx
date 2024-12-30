@@ -7,8 +7,7 @@ export const Grid4Layout = ({ products }) => {
   console.log('products', products);
 
   // Handle click event
-  const handleClick = (listing, category, subcategory) => {
-    console.log(`Listing: ${listing}, Category: ${category}, Subcategory: ${subcategory}`);
+  const handleClick = (listing, category) => {
 
     // Determine the category slug based on the category name
     const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'

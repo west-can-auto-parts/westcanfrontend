@@ -2,9 +2,13 @@
 
 import Usps from '@/app/(public)/product-view/_components/Usps';
 import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import locations from '@/datas/store';
 
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product/productenquiry'
+    : 'http://localhost:8080/api/product/productenquiry';
 export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
     const [error, setError] = useState(null);
@@ -19,6 +23,7 @@ export const ProductDescription = ({ myProduct }) => {
     });
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
+
     // Toggle Modal visibility
     const handleModalToggle = () => {
         setIsModalOpen(!isModalOpen);
@@ -37,35 +42,39 @@ export const ProductDescription = ({ myProduct }) => {
     };
 
     // Handle form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (event) => {
+        event.preventDefault();
         setFormError('');
         setFormSuccess('');
-
-        const { name, email, message } = formData;
-
-        // Form validation
-        if (!name || !email || !message) {
-            setFormError('All fields are required except your Phone Number');
+    
+        if (!formData.name || !formData.email || !formData.store || !formData.phoneNumber || !formData.message) {
+            setFormError('All fields are required.');
             return;
         }
-
+    
         try {
-            const response = await fetch('/api/product-query', {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(formData),
             });
-
-            const result = await response.json();
-
+    
+            // Check if the response is ok (status code 200-299)
             if (response.ok) {
-                setFormSuccess(
-                    <div>
-                        Your enquiry has been submitted successfully!
-                        <br />Our experts will get back to you shortly.
-                    </div>
-                );
+                const contentType = response.headers.get('content-type');
+                let responseData;
+    
+                if (contentType && contentType.includes('application/json')) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+    
+                setFormSuccess(responseData || 'Enquiry submitted successfully.');
+    
+                // Reset form and close modal
                 setFormData({
                     name: '',
                     email: '',
@@ -74,15 +83,17 @@ export const ProductDescription = ({ myProduct }) => {
                     part: '',
                     message: ''
                 });
-                setIsModalOpen(false); // Close the modal after submission
+                setIsModalOpen(false); // Close the modal
             } else {
-                setFormError(result.error || 'Failed to submit enquiry');
+                const errorText = await response.text();
+                setFormError(errorText || 'Failed to submit enquiry.');
             }
-        } catch (error) {
-            console.error('Error submitting form:', error);
-            setFormError('An error occurred. Please try again later.');
+        } catch (err) {
+            setFormError('An error occurred while submitting the enquiry.');
         }
     };
+    
+    
 
     return (
         <div className='w-full md:w-1/2'>
@@ -177,11 +188,6 @@ export const ProductDescription = ({ myProduct }) => {
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#b21b29] focus:border-[#b21b29] sm:text-sm"
                                     >
                                         <option value={product.description}>{product.description}</option>
-                                        {(product?.length > 0 ? product : []).map((part, index) => (
-                                            <option key={index} value={part.description}>
-                                                {part.description}
-                                            </option>
-                                        ))}
                                     </select>
                                 </div>
                                 <div className="mb-4">

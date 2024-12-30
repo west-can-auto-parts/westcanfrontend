@@ -9,13 +9,16 @@ import Link from 'next/link';
 import { ClipLoader } from 'react-spinners'; // Importing the spinner
 import { useRouter } from 'next/navigation';
 
+const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/blog'
+    : 'http://localhost:8080/api/blog';
 const page = () => {
     const [blogs, setBlogs] = useState([]);
     const [filteredBlogs, setFilteredBlogs] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state
     const router = useRouter()
-    const apiUrl = 'http://localhost:8080/api/blog';
     useEffect(() => {
         const fetchAllBlogs = async () => {
             try {
