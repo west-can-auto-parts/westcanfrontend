@@ -8,11 +8,16 @@ export  const NewsletterForm = () => {
   const [status, setStatus] = useState<null | 'success' | 'error'>(null);
   const [message, setMessage] = useState<string>('');
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api'
+    : 'http://localhost:8080/api';
+
  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/api/newsletter/subscribe', {
+      const response = await fetch(`${apiUrl}/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,10 +26,11 @@ export  const NewsletterForm = () => {
       });
 
       const data = await response.json();
+      console.log(data)
 
       if (response.ok) {
         setStatus('success');
-        setMessage('Subscribed successfully!');
+        setMessage(data.message);
         setEmail(''); // Clear the input field
       } else {
         setStatus('error');

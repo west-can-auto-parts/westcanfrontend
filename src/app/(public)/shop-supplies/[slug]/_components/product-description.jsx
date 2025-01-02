@@ -4,6 +4,7 @@ import Usps from '@/app/(public)/product-view/_components/Usps';
 import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
 import React, { useState, useEffect } from 'react';
 import locations from '@/datas/store';
+import { useRouter } from 'next/navigation'
 
 export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
@@ -19,6 +20,7 @@ export const ProductDescription = ({ myProduct }) => {
     });
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
+    const router = useRouter();
     // Toggle Modal visibility
     const handleModalToggle = () => {
         setIsModalOpen(!isModalOpen);
@@ -207,8 +209,8 @@ export const ProductDescription = ({ myProduct }) => {
                         </div>
                     </div>
                 )}
-                <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2'>
-                    <FaShoppingCart className='w-5 h-5' /> Add to Cart
+                <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2' onClick={()=>router.push('https://store.westcanauto.com/store/portal')}>
+                    <FaShoppingCart className='w-5 h-5' /> Shop Now
                 </button>
             </div>
         </div>
