@@ -2,13 +2,15 @@
 
 import Usps from '@/app/(public)/product-view/_components/Usps';
 import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import locations from '@/datas/store';
+import Select from "react-select";
+import { useRouter } from 'next/navigation'
 
 const isProduction = process.env.NODE_ENV === 'production';
-  const apiUrl = isProduction
-    ? 'https://frontendbackend-production.up.railway.app/api/product/productenquiry'
-    : 'http://localhost:8080/api/product/productenquiry';
+const apiUrl = isProduction
+    ? 'https://frontendbackend-production.up.railway.app/api/product'
+    : 'http://localhost:8080/api/product';
 export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
     const [error, setError] = useState(null);
@@ -18,19 +20,20 @@ export const ProductDescription = ({ myProduct }) => {
         email: '',
         store: '',
         phoneNumber: '',
-        part: '',
+        productName: [],
         message: ''
     });
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
+    const [categories, setCategories] = useState([]);
+    const router = useRouter()
 
     // Toggle Modal visibility
     const handleModalToggle = () => {
         setIsModalOpen(!isModalOpen);
         if (!isModalOpen) {
             setFormData((prevData) => ({
-                ...prevData,
-                part: product.description || '', // Default part when modal opens
+                ...prevData, // Default part when modal opens
             }));
         }
     };
@@ -41,46 +44,71 @@ export const ProductDescription = ({ myProduct }) => {
         setFormData((prevData) => ({ ...prevData, [id]: value }));
     };
 
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch(`${apiUrl}/product-category/all`); // Update the API endpoint as needed
+            if (response.ok) {
+                return await response.json();
+            }
+            throw new Error('Failed to fetch categories');
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    };
+
+    useEffect(() => {
+        (async () => {
+            const fetchedCategories = await fetchCategories();
+            setCategories(fetchedCategories.map((cat) => ({ label: cat.name, value: cat.name })));
+        })();
+    }, []);
+
+    const handlePartChange = (selectedOptions) => {
+        const selectedParts = selectedOptions.map((option) => option.value);
+        setFormData((prev) => ({ ...prev, productName: selectedParts }));
+    };
+
     // Handle form submission
     const handleSubmit = async (event) => {
         event.preventDefault();
         setFormError('');
         setFormSuccess('');
-    
+
         if (!formData.name || !formData.email || !formData.store || !formData.phoneNumber || !formData.message) {
             setFormError('All fields are required.');
             return;
         }
-    
+
         try {
-            const response = await fetch(apiUrl, {
+            const response = await fetch(`${apiUrl}/productenquiry`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData),
             });
-    
+
             // Check if the response is ok (status code 200-299)
             if (response.ok) {
                 const contentType = response.headers.get('content-type');
                 let responseData;
-    
+
                 if (contentType && contentType.includes('application/json')) {
                     responseData = await response.json();
                 } else {
                     responseData = await response.text();
                 }
-    
+
                 setFormSuccess(responseData || 'Enquiry submitted successfully.');
-    
+
                 // Reset form and close modal
                 setFormData({
                     name: '',
                     email: '',
                     store: '',
                     phoneNumber: '',
-                    part: '',
+                    productName: [],
                     message: ''
                 });
                 setIsModalOpen(false); // Close the modal
@@ -92,8 +120,8 @@ export const ProductDescription = ({ myProduct }) => {
             setFormError('An error occurred while submitting the enquiry.');
         }
     };
-    
-    
+
+
 
     return (
         <div className='w-full md:w-1/2'>
@@ -179,16 +207,16 @@ export const ProductDescription = ({ myProduct }) => {
                                 </div>
                                 <div className="mb-4">
                                     <label htmlFor="part" className="block text-sm font-medium text-gray-700">
-                                        Part to Query About
+                                    ProductName to Query About
                                     </label>
-                                    <select
-                                        id="part"
-                                        value={formData.part}
-                                        onChange={handleInputChange}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#b21b29] focus:border-[#b21b29] sm:text-sm"
-                                    >
-                                        <option value={product.description}>{product.description}</option>
-                                    </select>
+                                    <Select
+                                        isMulti
+                                        options={categories}
+                                        onChange={handlePartChange}
+                                        value={categories.filter((cat) => formData.productName.includes(cat.value))}
+                                        className="basic-multi-select"
+                                        classNamePrefix="select"
+                                    />
                                 </div>
                                 <div className="mb-4">
                                     <label htmlFor="message" className="block text-sm font-medium text-gray-700">
@@ -213,8 +241,8 @@ export const ProductDescription = ({ myProduct }) => {
                         </div>
                     </div>
                 )}
-                <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2'>
-                    <FaShoppingCart className='w-5 h-5' /> Add to Cart
+                <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2' onClick={()=>router.push('https://store.westcanauto.com/store/portal')}>
+                    <FaShoppingCart className='w-5 h-5' /> Shop Now
                 </button>
             </div>
         </div>

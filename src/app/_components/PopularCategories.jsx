@@ -62,8 +62,6 @@ const PopularCategories = () => {
         //getData();
     }, []);
 
-    console.log(subCats)
-
     const sideMenu = cats.map(cat => ({
         title: cat.name,
         items: subCats.filter(subCat => subCat.categoryName

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaHome, FaBriefcase, FaUserCog, FaClipboardList, FaWrench, FaBars } from 'react-icons/fa';
+import { FaHome, FaBriefcase, FaUserCog, FaClipboardList, FaWrench, FaBars  } from 'react-icons/fa';
+import { FaRegPenToSquare } from "react-icons/fa6";
 import { GiFountainPen } from 'react-icons/gi';
 import { FaPerson, FaUser } from 'react-icons/fa6';
 
@@ -9,6 +10,7 @@ const Navigation = () => {
     { icon: FaHome, label: 'Home', href: '/admin' },
     { icon: FaBriefcase, label: 'Jobs', href: '/admin/jobs' },
     { icon: FaClipboardList, label: ' Applications', href: '/admin/job-applications' },
+    { icon: FaRegPenToSquare,label:'Product-Enquiry-Form',href:'/admin/product-enquiry'},
     { icon: FaUserCog, label: 'Contacts', href: '/admin/contacts' },
     { icon: GiFountainPen, label: "Blogs", href: '/admin/blogs' },
     { icon: FaWrench, label: " Products", href: '/admin/products' },

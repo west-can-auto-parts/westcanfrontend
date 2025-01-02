@@ -46,6 +46,13 @@ const FeaturedProducts = () => {
         getProducts();
     }, []);
 
+    const handleClick = (listing, category) => {
+        const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
+          ? 'replacement-parts'
+          : 'shop-supplies';
+        router.push(`/${categorySlug}/${listing}`);
+      };
+
     return (
         <section className="bg-white py-4 md:py-12">
             <div className="w-10/12 mx-auto py-4">
@@ -98,7 +105,7 @@ const FeaturedProducts = () => {
                                         <div className="p-3 group-hover:bg-gray-100/75">
                                             <h3
                                                 className="text-md md:text-md font-semibold mb-2 cursor-pointer"
-                                                onClick={() => router.push(`/product-view/${product._id}`)}
+                                                onClick={()=>handleClick(product.name,product.categoryName)}
                                             >
                                                 {product.name}
                                             </h3>
@@ -110,14 +117,14 @@ const FeaturedProducts = () => {
                                                     WebkitLineClamp: 3,
                                                     overflow: "hidden",
                                                 }}
-                                                onClick={() => router.push(`/product-view/${product._id}`)}
+                                                onClick={() =>handleClick(product.name,product.categoryName)}
                                             >
                                                 {product.description}
                                             </p>
                                             <div className="flex flex-wrap justify-between items-center gap-2 mt-3">
                                                 <button
                                                     className="flex items-center gap-1 transition text-xs py-1 rounded-md hover:text-[#b21b29]"
-                                                    onClick={() => router.push(`/product-view/${product._id}`)}
+                                                    onClick={() =>handleClick(product.name,product.categoryName)}
                                                 >
                                                     <FaCartShopping className="w-4 h-4 transition-all duration-300 rounded-full" />
                                                     Shop Now

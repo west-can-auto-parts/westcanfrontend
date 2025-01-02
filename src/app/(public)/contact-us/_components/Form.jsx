@@ -19,6 +19,12 @@ export default function Form() {
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
     const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+      ? 'https://frontendbackend-production.up.railway.app/api/contact'
+      : 'http://localhost:8080/api/contact';
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -33,7 +39,7 @@ export default function Form() {
         const dataToSend = { ...formData, agreed };
 
         try {
-            const response = await fetch('/api/contacts', {
+            const response = await fetch(`${apiUrl}/save`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
