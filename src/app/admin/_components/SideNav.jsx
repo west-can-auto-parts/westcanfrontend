@@ -10,7 +10,7 @@ const Navigation = () => {
     { icon: FaHome, label: 'Home', href: '/admin' },
     { icon: FaBriefcase, label: 'Jobs', href: '/admin/jobs' },
     { icon: FaClipboardList, label: ' Applications', href: '/admin/job-applications' },
-    { icon: FaRegPenToSquare,label:'Product-Enquiry-Form',href:'/admin/product-enquiry'},
+    { icon: FaRegPenToSquare,label:'Product-Enquiry',href:'/admin/product-enquiry'},
     { icon: FaUserCog, label: 'Contacts', href: '/admin/contacts' },
     { icon: GiFountainPen, label: "Blogs", href: '/admin/blogs' },
     { icon: FaWrench, label: " Products", href: '/admin/products' },

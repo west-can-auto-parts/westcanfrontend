@@ -1,235 +1,171 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Field, Label, Switch } from '@headlessui/react';
-import SuccessModal from './SuccessModal'; // Adjust the path based on your project structure
-import FailureModal from './FailureModal';
-export default function Form() {
-    const [agreed, setAgreed] = useState(false);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        company: '',
-        email: '',
-        phoneNumber: '',
-        message: ''
-    });
-    const [responseMessage, setResponseMessage] = useState('');
-    const [responseType, setResponseType] = useState(''); // success or error
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-    const [isFailureModalOpen, setIsFailureModalOpen] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import locations from "@/datas/store";
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    const apiUrl = isProduction
-      ? 'https://frontendbackend-production.up.railway.app/api/contact'
-      : 'http://localhost:8080/api/contact';
+const Form = () => {
+  const [selectedLocation, setSelectedLocation] = useState(locations[0]);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    company: locations[0]?.name || "",
+    email: "",
+    phoneNumber: "",
+    message: "",
+});
+  const [agreed, setAgreed] = useState(false);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
-    };
+  const router = useRouter();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+  const handleCardClick = (location) => {
+    setSelectedLocation(location);
+        setFormData((prev) => ({
+            ...prev,
+            company: location.name,
+        }));
+  };
 
-        const dataToSend = { ...formData, agreed };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-        try {
-            const response = await fetch(`${apiUrl}/save`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(dataToSend)
-            });
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Handle form submission logic
+  };
+  console.log('locations: ',selectedLocation)
 
-            if (response.ok) {
-                setIsSuccessModalOpen(true);
-                setResponseMessage('Your message has been sent successfully!');
-                setResponseType('success');
-                setFormData({
-                    firstName: '',
-                    lastName: '',
-                    company: '',
-                    email: '',
-                    phoneNumber: '',
-                    message: ''
-                });
-                setAgreed(false);
-            } else {
-                const errorData = await response.json();
-                setResponseMessage(`Error: ${errorData.message}`);
-                setResponseType('error');
-                setIsFailureModalOpen(true);
-            }
-        } catch (error) {
-            setResponseMessage('Error: Could not send the message. Please try again later.');
-            setResponseType('error');
-            setIsFailureModalOpen(true);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="mx-auto w-full md:w-1/2 px-8">
-            <p className="text-2xl font-bold my-4">Reach Out To Us</p>
-
-            {responseMessage && (
-                <p className={`my-4 text-sm ${responseType === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                    {responseMessage}
-                </p>
-            )}
-
-            <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                <div>
-                    <label htmlFor="first-name" className="block text-sm font-semibold leading-6 text-gray-900">
-                        First name
-                    </label>
-                    <div className="mt-2.5">
-                        <input
-                            id="first-name"
-                            name="firstName"
-                            type="text"
-                            autoComplete="given-name"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
+  return (
+    <div className="flex flex-wrap lg:flex-nowrap gap-6 p-6">
+        
+      {/* Left Section: Locations */}
+      <div className="w-full md:w-1/2 p-6">
+        <h2 className="text-2xl font-bold mb-4">Find Us At</h2>
+        <div
+                className="bg-white w-full cursor-pointer group text-start mb-4 shadow-md rounded-lg mx-auto flex flex-wrap md:flex-nowrap gap-6 p-2"
+                onClick={() => router.push(`/store/${selectedLocation.id}`)}
+            >
+                <img
+                    src={selectedLocation.imgUrl}
+                    alt={selectedLocation.name}
+                    className="w-full md:w-32 h-32 rounded-lg object-cover"
+                />
+                <div className="my-auto">
+                    <h3 className="text-lg font-semibold mb-1 text-[#b12b29] group-hover:underline transition">
+                        {selectedLocation.name}
+                    </h3>
+                    <p className="text-gray-600 mb-1 text-sm">
+                        <strong>Address:</strong> {selectedLocation.address}
+                    </p>
+                    {selectedLocation.phone && (
+                        <p className="text-gray-600 mb-1 text-sm">
+                            <strong>Phone:</strong> {selectedLocation.phone}
+                        </p>
+                    )}
+                    <button className="text-[#b91b29] hover:text-red-700 transition">View Store</button>
                 </div>
-                <div>
-                    <label htmlFor="last-name" className="block text-sm font-semibold leading-6 text-gray-900">
-                        Last name
-                    </label>
-                    <div className="mt-2.5">
-                        <input
-                            id="last-name"
-                            name="lastName"
-                            type="text"
-                            autoComplete="family-name"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
-                </div>
-                <div className="sm:col-span-2">
-                    <label htmlFor="company" className="block text-sm font-semibold leading-6 text-gray-900">
-                        Address
-                    </label>
-                    <div className="mt-2.5">
-                        <input
-                            id="company"
-                            name="company"
-                            type="text"
-                            autoComplete="organization"
-                            value={formData.company}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
-                </div>
-                <div className="sm:col-span-2">
-                    <label htmlFor="email" className="block text-sm font-semibold leading-6 text-gray-900">
-                        Email
-                    </label>
-                    <div className="mt-2.5">
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
-                </div>
-                <div className="sm:col-span-2">
-                    <label htmlFor="phone-number" className="block text-sm font-semibold leading-6 text-gray-900">
-                        Phone number
-                    </label>
-                    <div className="relative mt-2.5">
-                        <div className="absolute inset-y-0 left-0 flex items-center">
-                            <label htmlFor="country" className="sr-only">
-                                Country
-                            </label>
-                            <select
-                                id="country"
-                                name="country"
-                                className="h-full rounded-md border-0 bg-transparent bg-none py-0 pl-4 pr-9 text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
-                            >
-                                <option>CA</option>
-                                <option>US</option>
-                                <option>EU</option>
-                            </select>
-                            {/* <FaChevronDown
-                                aria-hidden="true"
-                                className="pointer-events-none absolute right-3 top-0 h-full w-5 text-gray-400"
-                            /> */}
-                        </div>
-                        <input
-                            id="phone-number"
-                            name="phoneNumber"
-                            type="tel"
-                            autoComplete="tel"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 pl-20 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
-                </div>
-                <div className="sm:col-span-2">
-                    <label htmlFor="message" className="block text-sm font-semibold leading-6 text-gray-900">
-                        Message
-                    </label>
-                    <div className="mt-2.5">
-                        <textarea
-                            id="message"
-                            name="message"
-                            rows={4}
-                            value={formData.message}
-                            onChange={handleChange}
-                            className="block w-full rounded-md border-0 px-3.5 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        />
-                    </div>
-                </div>
-                <Field className="flex gap-x-4 sm:col-span-2">
-                    <div className="flex h-6 items-center">
-                        <Switch
-                            checked={agreed}
-                            onChange={setAgreed}
-                            className="group flex w-8 flex-none cursor-pointer rounded-full bg-gray-200 p-px ring-1 ring-inset ring-gray-900/5 transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 data-[checked]:bg-indigo-600"
-                        >
-                            <span className="sr-only">Agree to policies</span>
-                            <span
-                                aria-hidden="true"
-                                className="h-4 w-4 transform rounded-full bg-white shadow-sm ring-1 ring-gray-900/5 transition duration-200 ease-in-out group-data-[checked]:translate-x-3.5"
-                            />
-                        </Switch>
-                    </div>
-                    <Label className="text-sm leading-6 text-gray-600">
-                        By selecting this, you agree to our{' '}
-                        <a href="#" className="font-semibold">
-                            privacy&nbsp;policy
-                        </a>
-                        .
-                    </Label>
-                </Field>
             </div>
-            <SuccessModal isOpen={isSuccessModalOpen} onClose={() => setIsSuccessModalOpen(false)} />
-            <FailureModal isOpen={isFailureModalOpen} onClose={() => setIsFailureModalOpen(false)} errorMessage={errorMessage} />
-            <div className="mt-10">
-                <button
-                    type="submit"
-                    className="block w-full rounded-md bg-[#b12b29] px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 "
-                >
-                    Let's Connect
-                </button>
+            <div className="flex flex-col gap-6 mb-6 h-[50vh] overflow-y-auto py-4">
+        {locations.map((location) => (
+          <div
+            key={location.id}
+            onClick={() => handleCardClick(location)}
+            className={`p-4 rounded-md cursor-pointer transition flex gap-4 items-center ${
+              selectedLocation.id === location.id
+                ? "bg-[#b12b29] text-white"
+                : "bg-white text-gray-800 border shadow-md"
+            }`}
+          >
+            <div className="flex-grow">
+              <h3 className="text-lg font-semibold">{location.name}</h3>
+              <p className="text-sm">{location.address}</p>
+              {location.phone && <p className="text-sm">Phone: {location.phone}</p>}
             </div>
+          </div>
+        ))}
+        </div>
+      </div>
+
+      {/* Right Section: Form */}
+      <div className="w-full lg:w-2/3 bg-white p-8 rounded-md shadow-md">
+        <h2 className="text-2xl font-bold mb-4">Reach Out To Us</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4">
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              placeholder="First name"
+              className="w-1/2 p-2 border rounded-md"
+            />
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Last name"
+              className="w-1/2 p-2 border rounded-md"
+            />
+          </div>
+          <input
+            type="text"
+            name="address"
+            value={selectedLocation.name}
+            disabled
+            className="w-full p-2 border rounded-md bg-gray-100"
+          />
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Email"
+            className="w-full p-2 border rounded-md"
+          />
+          <input
+            type="tel"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleChange}
+            placeholder="Phone number"
+            className="w-full p-2 border rounded-md"
+          />
+          <textarea
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Message"
+            rows="4"
+            className="w-full p-2 border rounded-md"
+          ></textarea>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={agreed}
+              onChange={() => setAgreed(!agreed)}
+              className="w-5 h-5"
+            />
+            <label className="text-sm">
+              By selecting this, you agree to our{" "}
+              <a href="#" className="text-blue-600 underline">
+                privacy policy
+              </a>
+              .
+            </label>
+          </div>
+          <button
+            type="submit"
+            className="block w-full rounded-md bg-[#b12b29] px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 "
+          >
+            Let's Connect
+          </button>
         </form>
-    );
-}
+      </div>
+    </div>
+  );
+};
+
+export default Form;
