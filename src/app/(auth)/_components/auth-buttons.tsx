@@ -4,17 +4,14 @@ import Image from "next/image";
 import googleLogo from "@/assets/google.png";
 import appleLogo from "@/assets/apple.png";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DEFAULT_LOGIN_REDIRECT } from "../../../route";
 
 export function GoogleSignInButton() {
-  const searchParams = useSearchParams();
-  const callBackUrl = searchParams.get("callBackUrl");
-  
   const onClick = () => {
-    signIn("google", {
-      callbackUrl: callBackUrl || DEFAULT_LOGIN_REDIRECT,
-    });
+    // Redirect to the backend OAuth2 login endpoint
+    const backendOAuthUrl = "http://localhost:8080/oauth2/authorization/google";
+    window.location.href = backendOAuthUrl; // Use window.location for full page redirect
   };
 
   return (
