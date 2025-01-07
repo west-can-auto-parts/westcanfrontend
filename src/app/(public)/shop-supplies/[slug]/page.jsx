@@ -25,6 +25,7 @@ const Page = ({ params }) => {
   const [categorySlug, setCategorySlug] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
   const [productId, setProductId] = useState(null);
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
@@ -100,6 +101,43 @@ const Page = ({ params }) => {
       <div className="w-full">
         <PartSupplier subCategoryName={myProduct.name} />
       </div>
+      {showPopup && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+
+          {/* Close Button */}
+          <button
+            className="absolute -top-6 -right-6 bg-white text-[#b12b29] font-bold border-2 border-[#b12b29] rounded-full p-2 w-10 h-10 flex items-center justify-center hover:bg-[#b12b29] hover:text-white transition focus:outline-none shadow-md"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent the link from being triggered
+              closePopup(); // Close the popup
+            }}
+          >
+            ✕
+          </button>
+          <a
+            href="https://store.westcanauto.com/store/portal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative bg-[#b12b29] text-white shadow-lg border rounded-lg p-4 flex items-center gap-4 w-full max-w-lg cursor-pointer"
+          >
+
+            {/* Product Image */}
+            <div className="flex-shrink-0">
+              <img
+                src={myProduct.imageUrl[0]} // Replace `imageUrl` with the correct field for product image
+                alt={myProduct.name}
+                className="w-16 h-16 object-cover rounded"
+              />
+            </div>
+
+            {/* Product Details */}
+            <div>
+              <h3 className="font-bold text-lg mb-1">{myProduct.name}</h3>
+              <p className="text-sm">{myProduct.description?.slice(0, 100)}...</p>
+            </div>
+          </a>
+        </div>
+      )}
     </div>
   );
 };

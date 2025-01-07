@@ -20,6 +20,7 @@ export const ProductDescription = ({ myProduct }) => {
     });
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
+    const [isHovering, setIsHovering] = useState(false);
     const router = useRouter();
     // Toggle Modal visibility
     const handleModalToggle = () => {
@@ -88,6 +89,14 @@ export const ProductDescription = ({ myProduct }) => {
 
     return (
         <div className='w-full md:w-1/2'>
+             {isHovering && (
+                    <div
+                    className="absolute bottom-[15%] transform -translate-x-1/2 translate-x-12 bg-[#b12b29] text-white text-sm rounded-md p-2 shadow-lg z-50 mt-2"
+
+                    >
+                        Click the SHOP NOW button below to find the perfect brake rotors for your vehicle!
+                    </div>
+                )}
             <h1 className="text-2xl font-bold mb-2 py-2">{myProduct.name}</h1>
             <p className="text-xs md:text-sm text-justify">{myProduct.description}</p>
             <div className="py-2 flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm">
@@ -209,7 +218,12 @@ export const ProductDescription = ({ myProduct }) => {
                         </div>
                     </div>
                 )}
-                <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2' onClick={()=>router.push('https://store.westcanauto.com/store/portal')}>
+                <button
+                    className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2'
+                    onClick={() => router.push('https://store.westcanauto.com/store/portal')}
+                    onMouseEnter={() => setIsHovering(true)} // Show popup on hover
+                    onMouseLeave={() => setIsHovering(false)}
+                >
                     <FaShoppingCart className='w-5 h-5' /> Shop Now
                 </button>
             </div>
