@@ -6,6 +6,17 @@ export const Grid4Layout = ({ products }) => {
   const router = useRouter();
   console.log('products', products);
 
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+  
+    return str
+      .toLowerCase()          
+      .trim()                 
+      .replace(/[^a-z0-9 -]/g, "")  
+      .replace(/\s+/g, "-")         
+      .replace(/--+/g, "-");       
+  }
+
   // Handle click event
   const handleClick = (listing, category, subcategory) => {
     console.log(`Listing: ${listing}, Category: ${category}, Subcategory: ${subcategory}`);
@@ -16,7 +27,8 @@ export const Grid4Layout = ({ products }) => {
       : 'shop-supplies';
 
     // Navigate to the specific product page with category and subcategory
-    router.push(`/${categorySlug}/${listing}`);
+    const slug = stringToSlug(listing); 
+    router.push(`/${categorySlug}/${slug}`);
   };
 
   return (

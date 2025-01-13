@@ -4,18 +4,26 @@ import { useRouter } from "next/navigation";
 
 export const Grid4Layout = ({ products }) => {
   const router = useRouter();
-  console.log('products', products);
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+  
+    return str
+      .toLowerCase()          
+      .trim()                 
+      .replace(/[^a-z0-9 -]/g, "")  
+      .replace(/\s+/g, "-")         
+      .replace(/--+/g, "-");       
+  }
+  
 
   // Handle click event
   const handleClick = (listing, category) => {
-
-    // Determine the category slug based on the category name
     const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
       ? 'replacement-parts'
       : 'shop-supplies';
 
-    // Navigate to the specific product page with category and subcategory
-    router.push(`/${categorySlug}/${listing}`);
+      const slug = stringToSlug(listing); // Convert listing to a slug
+      router.push(`/${categorySlug}/${slug}`);
   };
 
   return (

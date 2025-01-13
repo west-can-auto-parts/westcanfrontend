@@ -22,6 +22,17 @@ export const RelatedParts = ({ subCategoryName }) => {
         ? 'https://frontendbackend-production.up.railway.app/api/product'
         : 'http://localhost:8080/api/product';
 
+    function stringToSlug(str) {
+        str = str.replace("&", "and");
+
+        return str
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9 -]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/--+/g, "-");
+    }
+
     useEffect(() => {
         const fetchRelatedProducts = async () => {
             try {
@@ -75,7 +86,7 @@ export const RelatedParts = ({ subCategoryName }) => {
                 }}
             >
                 {relatedProducts.map((product, index) => (
-                    <SwiperSlide key={index} className="py-4 h-full" onClick={() => router.push(`/shop-supplies/${product.name}`)}>
+                    <SwiperSlide key={index} className="py-4 h-full" onClick={() => router.push(`/shop-supplies/${stringToSlug(product.name)}`)}>
                         <div className="bg-white shadow-md rounded h-full group transition duration-300">
                             <img
                                 src={product.imageUrl[0]}
