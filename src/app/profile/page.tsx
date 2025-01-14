@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from 'react';
-import { auth } from '../../auth';
 
 interface Order {
   number: string;
@@ -10,45 +9,31 @@ interface Order {
   total: string;
 }
 
-interface Address {
-  street: string;
-}
-
-interface PhoneNumber {
-  number: string;
-}
-
 interface User {
   name: string;
   email: string;
   image?: string;
-  addresses?: Address[];
-  phoneNumbers?: PhoneNumber[];
-}
-
-interface Session {
-  user?: User;
+  address?: string;
+  phoneNumber?: string;
 }
 
 const Page: React.FC = () => {
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const fetchedSession = await auth();
-      
-        setSession(fetchedSession as Session);
-        
-        // Fetch or set example orders data based on user session
-        // Here you would fetch real orders data
-        const exampleOrders: Order[] = [
-          // Add orders data here
-        ];
-        setOrders(exampleOrders);
+        // Replace these with your actual API endpoints
+        const userResponse = await fetch('http://localhost:8080/api/user');
+        const userData: User = await userResponse.json();
+        setUser(userData);
+
+        const ordersResponse = await fetch('http://localhost:8080/api/orders');
+        const ordersData: Order[] = await ordersResponse.json();
+        setOrders(ordersData);
       } catch (error) {
-        console.error('Failed to authenticate:', error);
+        console.error('Failed to fetch data:', error);
       }
     };
 
@@ -60,17 +45,17 @@ const Page: React.FC = () => {
       <section className='flex flex-wrap md:flex-nowrap gap-8'>
         <div className="w-full md:w-1/2 bg-white flex items-center justify-center gap-4">
           <div className='p-12 flex flex-col items-center justify-center'>
-            <img 
-              src={session?.user?.image || "https://www.gravatar.com/avatar?d=mp&s=88"} 
-              alt="Profile Picture" 
-              className='w-15 h-15 object-cover rounded-full mb-6' 
+            <img
+              src={user?.image || "https://www.gravatar.com/avatar?d=mp&s=88"}
+              alt="Profile Picture"
+              className='w-15 h-15 object-cover rounded-full mb-6'
             />
             <div className="mb-6 text-center">
               <p className='font-bold text-xl'>
-                {session?.user?.name || 'First Name Last Name'}
+                {user?.name || 'First Name Last Name'}
               </p>
               <p className="text-sm text-gray-500">
-                {session?.user?.email || 'useremail@site.com'}
+                {user?.email || 'useremail@site.com'}
               </p>
             </div>
             <button className='bg-gray-100 text-sm font-bold px-4 py-2'>Edit Profile</button>
@@ -78,29 +63,23 @@ const Page: React.FC = () => {
         </div>
         <div className="w-full md:w-1/2 bg-white gap-4">
           <div className='p-8'>
-            <p className='font-bold mb-1'>
-              Address :
-            </p>
+            <p className='font-bold mb-1'>Address :</p>
             <p className="text-sm mb-3">
-              {session?.user?.addresses?.[0]?.street || 'No address available'}
+              {user?.address || 'No address available'}
             </p>
-            <p className='font-bold mb-1'>
-              Phone :
-            </p>
+            <p className='font-bold mb-1'>Phone :</p>
             <p className="text-sm mb-3">
-              {session?.user?.phoneNumbers?.[0]?.number || 'No phone number available'}
+              {user?.phoneNumber || 'No phone number available'}
             </p>
-            <p className='font-bold mb-1'>
-              Email :
-            </p>
+            <p className='font-bold mb-1'>Email :</p>
             <p className="text-sm mb-3">
-              {session?.user?.email || 'No email available'}
+              {user?.email || 'No email available'}
             </p>
             <button className='text-[#b12b29] font-semibold'>Edit Profile</button>
           </div>
         </div>
       </section>
-      <section className='mt-6'>
+      {/* <section className='mt-6'>
         <div className="w-full mx-auto bg-white">
           <h2 className="text-xl font-bold p-4">Recent Orders</h2>
           <div className="overflow-x-auto">
@@ -134,7 +113,7 @@ const Page: React.FC = () => {
             </table>
           </div>
         </div>
-      </section>
+      </section> */}
     </>
   );
 };

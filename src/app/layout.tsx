@@ -14,6 +14,7 @@ import { MobileNavs } from "@/components/mobile-nav";
 
 import { SessionProvider } from "next-auth/react";
 import { auth } from "@/auth";
+import { AuthProvider } from "./AuthContext";
 
 const inter = Raleway({ subsets: ["latin"] });
 
@@ -34,14 +35,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SessionProvider session={session}>
+      <AuthProvider>
         <Header />
         {children}
         <ContactWidget />
         <ChatWidget />
         <Footer />
         <MobileNavs/>
-        </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

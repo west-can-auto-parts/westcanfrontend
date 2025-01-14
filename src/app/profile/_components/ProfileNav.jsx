@@ -2,10 +2,9 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/auth';
+import { useAuth } from '@/app/AuthContext'; 
 
-const ProfileNav = () => {// Ensure this returns user session properly // Optional chaining to avoid errors
-
+const ProfileNav = () => {
     const navLinks = [
         {
             label: 'Dashboard',
@@ -30,12 +29,12 @@ const ProfileNav = () => {// Ensure this returns user session properly // Option
     ];
 
     const router = useRouter();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        // Add your logout logic here, for example:
-        // await auth.logout(); // Replace with your actual logout logic
-        router.push('/'); // Redirect to home or login page after logout
-    };
+        logout();  // This will remove username from localStorage and update context
+        router.push('/');  // Redirect to home page after logout
+      };
 
     return (
         <div className='bg-white'>
