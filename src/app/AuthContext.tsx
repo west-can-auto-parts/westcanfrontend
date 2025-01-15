@@ -37,11 +37,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       localStorage.setItem('username', username);
     } else {
       localStorage.removeItem('username');
+      localStorage.removeItem('jwt_token');
     }
+
+    // Listen for localStorage changes
+    const handleStorageChange = () => {
+      const storedUsername = localStorage.getItem('username');
+      if (storedUsername !== username) {
+        setUsername(storedUsername);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [username]);
 
   const logout = () => {
-    setUsername(null); // Remove username from context
+    setUsername(null); // Remove username from context and localStorage
   };
 
   return (

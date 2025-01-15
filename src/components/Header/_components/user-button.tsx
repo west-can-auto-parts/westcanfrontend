@@ -1,13 +1,18 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { HiUser } from 'react-icons/hi';
-import { useAuth } from '../../../app/AuthContext'; // Import useAuth hook
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { HiUser } from "react-icons/hi";
+import { useAuth } from "../../../app/AuthContext";
+import { jwtDecode } from "jwt-decode";
+import { useOAuth2 } from "@/app/(auth)/_components/OAuth2RedirectHandler";
 
 export const UserButton = () => {
-  const { username } = useAuth(); // Access the username from context
+  const { username: authUsername } = useAuth(); // Get username from AuthContext
+  const { username: oauthUsername } = useOAuth2(); // Get username from OAuth2Context
 
+  // Combine both usernames, prioritizing the one from OAuth2 if both are available
+  const username = oauthUsername || authUsername; 
   return (
     <div className="flex gap-2 items-center">
       <div className="bg-[#b91b29] text-white rounded-md md:rounded-full p-1">

@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import locations from "@/datas/store";
 
+const isProduction = process.env.NODE_ENV === 'production';
+const apiUrl = isProduction
+  ? 'https://frontendbackend-production.up.railway.app/api/contact'
+  : 'http://localhost:8080/api/contact';
 const Form = () => {
   const [selectedLocation, setSelectedLocation] = useState(locations[0]);
   const [formData, setFormData] = useState({
@@ -15,6 +19,8 @@ const Form = () => {
     message: "",
 });
   const [agreed, setAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const router = useRouter();
 
@@ -31,9 +37,49 @@ const Form = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission logic
+
+    if (!agreed) {
+      setError("You must agree to the privacy policy to proceed.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${apiUrl}/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          agreed,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert("Your contact information was successfully saved!");
+        setFormData({
+          firstName: "",
+          lastName: "",
+          company: selectedLocation.name,
+          email: "",
+          phoneNumber: "",
+          message: "",
+        });
+        setAgreed(false);
+      } else {
+        setError("Something went wrong. Please try again later.");
+      }
+    } catch (err) {
+      setError("Failed to send the request. Please check your network.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   console.log('locations: ',selectedLocation)
 

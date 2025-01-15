@@ -48,10 +48,10 @@ export const SignInForm = () => {
         // Handle response based on the backend data structure
         if (data?.message === "Bad credentials") {
           setAlertMessage({ type: 'error', message: 'Invalid email or password.' });
-        } else if (data?.jwtToken) {
+        } else if (data?.jwt_token) {
           setAlertMessage({ type: 'success', message: `Welcome, ${data.username}!` });
           // Store the user's name and token in localStorage
-          localStorage.setItem('jwtToken', data.jwtToken);
+          localStorage.setItem('jwt_token', data.jwt_token);
           localStorage.setItem('username', data.username); // Store the username in localStorage
 
           // Update the username in the context

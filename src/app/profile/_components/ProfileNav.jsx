@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/AuthContext'; 
+import { useOAuth2 } from '@/app/(auth)/_components/OAuth2RedirectHandler';
 
 const ProfileNav = () => {
     const navLinks = [
@@ -27,13 +28,20 @@ const ProfileNav = () => {
             href: 'password',
         },
     ];
-
     const router = useRouter();
-    const { logout } = useAuth();
-
+    const { logout: authLogout } = useAuth(); // Renaming the logout from AuthContext
+    const { logout: oauthLogout } = useOAuth2();
     const handleLogout = () => {
-        logout();  // This will remove username from localStorage and update context
-        router.push('/');  // Redirect to home page after logout
+       
+        
+         // Renaming the logout from OAuth2Context
+      
+        // Call the logout from both contexts
+        authLogout();  // This will remove username from localStorage and update context
+        oauthLogout();  // This will clear the OAuth-related state
+      
+        // Redirect to home page after logout
+        router.push('/');
       };
 
     return (
