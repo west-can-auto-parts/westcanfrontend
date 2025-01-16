@@ -8,11 +8,14 @@ import * as z from "zod";
 import { GoogleSignInButton, AppleSignInButton } from "./auth-buttons";
 import { RegisterSchema } from "../../../schemas";
 import axios from "axios"; // Use Axios for API calls
+import { useRouter } from 'next/navigation';
+import locations from '@/datas/store'; // Import locations data
 
 export const SignUpForm = () => {
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const router = useRouter();
 
   // Extend schema to include additional fields
   const ExtendedRegisterSchema = RegisterSchema.extend({
@@ -48,6 +51,7 @@ export const SignUpForm = () => {
           setSuccessMessage(data);
           setErrorMessage(null);
           reset(); // Reset the form
+          router.push("/sign-in");
         })
         .catch((error) => {
           setErrorMessage(
@@ -157,17 +161,23 @@ export const SignUpForm = () => {
             )}
           </div>
 
-          {/* Nearest Store Field */}
+          {/* Nearest Store Dropdown Field */}
           <div>
             <label htmlFor="nearestStore" className="block text-sm font-medium text-gray-900">
               Nearest Store
             </label>
-            <input
+            <select
               id="nearestStore"
-              type="text"
               {...formRegister("nearestStore")}
-              className="block w-full rounded-md border-2 py-1.5 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-red-800 sm:text-sm"
-            />
+              className="block w-full rounded-md border-2 py-1.5 text-gray-900 focus:ring-2 focus:ring-red-800 sm:text-sm"
+            >
+              <option value="">Select a store</option>
+              {locations.map((store) => (
+                <option key={store.id} value={store.name}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
             {errors.nearestStore && (
               <p className="text-red-600 text-sm">{errors.nearestStore.message}</p>
             )}

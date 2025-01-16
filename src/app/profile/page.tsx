@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-
-interface Order {
-  number: string;
-  date: string;
-  status: string;
-  total: string;
-}
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/AuthContext";
+import { useOAuth2 } from "@/app/(auth)/_components/OAuth2RedirectHandler";
+import locations from "@/datas/store"; // Import locations
 
 interface User {
   name: string;
@@ -15,106 +12,192 @@ interface User {
   image?: string;
   address?: string;
   phoneNumber?: string;
+  nearestStore?: string;
+  password?: string;
 }
 
 const Page: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState<User | null>(null);
+  const router = useRouter();
+  const { logout: authLogout } = useAuth(); // Renaming the logout from AuthContext
+  const { logout: oauthLogout } = useOAuth2();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Replace these with your actual API endpoints
-        const userResponse = await fetch('http://localhost:8080/api/user');
+        const token = localStorage.getItem("jwt_token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const userResponse = await fetch("http://localhost:8080/api/user", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
         const userData: User = await userResponse.json();
         setUser(userData);
-
-        const ordersResponse = await fetch('http://localhost:8080/api/orders');
-        const ordersData: Order[] = await ordersResponse.json();
-        setOrders(ordersData);
+        setEditedUser(userData);
       } catch (error) {
-        console.error('Failed to fetch data:', error);
+        console.error("Failed to fetch data:", error);
       }
     };
 
     fetchData();
   }, []);
 
+  const handleLogout = () => {
+    authLogout();
+    oauthLogout();
+    router.push("/");
+  };
+
+  const handleEditToggle = () => {
+    setIsEditing((prev) => !prev);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setEditedUser((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("jwt_token");
+      if (!token || !editedUser) {
+        throw new Error("Missing token or user data");
+      }
+
+      const response = await fetch("http://localhost:8080/api/user/edit", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editedUser),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update user data");
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      setEditedUser(updatedUser);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Failed to save user data:", error);
+    }
+  };
+
   return (
-    <>
-      <section className='flex flex-wrap md:flex-nowrap gap-8'>
-        <div className="w-full md:w-1/2 bg-white flex items-center justify-center gap-4">
-          <div className='p-12 flex flex-col items-center justify-center'>
-            <img
-              src={user?.image || "https://www.gravatar.com/avatar?d=mp&s=88"}
-              alt="Profile Picture"
-              className='w-15 h-15 object-cover rounded-full mb-6'
+    <section className="flex flex-wrap md:flex-nowrap gap-8">
+      <div className="w-full md:w-1/2 bg-white flex items-center justify-center gap-4">
+        <div className="p-12 flex flex-col items-center justify-center">
+          <img
+            src={user?.image || "https://www.gravatar.com/avatar?d=mp&s=88"}
+            alt="Profile Picture"
+            className="w-20 h-20 object-cover rounded-full mb-4"
+          />
+          <div className="mb-6 text-center">
+            <input
+              type="text"
+              name="name"
+              value={editedUser?.name || ""}
+              disabled={!isEditing}
+              onChange={handleChange}
+              className={`font-bold text-xl text-center ${
+                isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+              }`}
             />
-            <div className="mb-6 text-center">
-              <p className='font-bold text-xl'>
-                {user?.name || 'First Name Last Name'}
-              </p>
-              <p className="text-sm text-gray-500">
-                {user?.email || 'useremail@site.com'}
-              </p>
-            </div>
-            <button className='bg-gray-100 text-sm font-bold px-4 py-2'>Edit Profile</button>
+            <p className="text-sm text-gray-500">{user?.email || "useremail@site.com"}</p>
+          </div>
+          <div className="text-sm md:text-md p-2 md:p-4">
+            {isEditing ? (
+              <button onClick={handleSave} className="bg-green-500 text-white font-bold px-4 py-2">
+                Save
+              </button>
+            ) : (
+              <button
+                onClick={handleEditToggle}
+                className="bg-gray-100 text-[#b12b29] font-bold px-4 py-2"
+              >
+                Edit Profile
+              </button>
+            )}
+            <button
+              onClick={handleLogout}
+              className="bg-gray-100 text-[#b12b29] font-bold px-4 py-2 ml-4"
+            >
+              Logout
+            </button>
           </div>
         </div>
-        <div className="w-full md:w-1/2 bg-white gap-4">
-          <div className='p-8'>
-            <p className='font-bold mb-1'>Address :</p>
-            <p className="text-sm mb-3">
-              {user?.address || 'No address available'}
-            </p>
-            <p className='font-bold mb-1'>Phone :</p>
-            <p className="text-sm mb-3">
-              {user?.phoneNumber || 'No phone number available'}
-            </p>
-            <p className='font-bold mb-1'>Email :</p>
-            <p className="text-sm mb-3">
-              {user?.email || 'No email available'}
-            </p>
-            <button className='text-[#b12b29] font-semibold'>Edit Profile</button>
-          </div>
+      </div>
+      <div className="w-full md:w-1/2 bg-white gap-4">
+        <div className="p-8">
+          <p className="font-bold mb-1">Address :</p>
+          <input
+            type="text"
+            name="address"
+            value={editedUser?.address || ""}
+            disabled={!isEditing}
+            onChange={handleChange}
+            className={`text-sm mb-3 w-full ${
+              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+            }`}
+          />
+          <p className="font-bold mb-1">Phone :</p>
+          <input
+            type="text"
+            name="phoneNumber"
+            value={editedUser?.phoneNumber || ""}
+            disabled={!isEditing}
+            onChange={handleChange}
+            className={`text-sm mb-3 w-full ${
+              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+            }`}
+          />
+          <p className="font-bold mb-1">Nearest Store :</p>
+          {/* Nearest Store Dropdown */}
+          <select
+            name="nearestStore"
+            value={editedUser?.nearestStore || ""}
+            disabled={!isEditing}
+            onChange={handleChange}
+            className={`text-sm mb-3 w-full ${
+              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+            }`}
+          >
+            <option value="" disabled>Select Store</option>
+            {locations.map((store, index) => (
+              <option key={index} value={store.name}>
+                {store.name}
+              </option>
+            ))}
+          </select>
+          <p className="font-bold mb-1">Password :</p>
+          <input
+            type="password"
+            name="password"
+            value={editedUser?.password || ""}
+            disabled={!isEditing}
+            onChange={handleChange}
+            className={`text-sm mb-3 w-full ${
+              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+            }`}
+          />
         </div>
-      </section>
-      {/* <section className='mt-6'>
-        <div className="w-full mx-auto bg-white">
-          <h2 className="text-xl font-bold p-4">Recent Orders</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border border-gray-200 px-4">
-              <thead>
-                <tr className="bg-white px-4">
-                  <th className="py-2 px-4 border-b text-left">Number</th>
-                  <th className="py-2 px-4 border-b text-left">Date</th>
-                  <th className="py-2 px-4 border-b text-left">Status</th>
-                  <th className="py-2 px-4 border-b text-left">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {orders.length > 0 ? (
-                  orders.map((order, index) => (
-                    <tr key={index} className="hover:bg-gray-50 text-sm">
-                      <td className="py-2 px-4 border-b">{order.number}</td>
-                      <td className="py-2 px-4 border-b">{order.date}</td>
-                      <td className={`py-2 px-4 border-b ${order.status === 'Shipped' ? 'text-green-500' : 'text-yellow-500'}`}>
-                        {order.status}
-                      </td>
-                      <td className="py-2 px-4 border-b">{order.total}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-4 text-center text-gray-500">No orders found</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section> */}
-    </>
+      </div>
+    </section>
   );
 };
 

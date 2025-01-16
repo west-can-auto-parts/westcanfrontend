@@ -46,7 +46,7 @@ const ProfileNav = () => {
 
     return (
         <div className='bg-white'>
-            <p className="hidden md:block text-2xl font-bold pb-6 p-4">
+            {/* <p className="hidden md:block text-2xl font-bold pb-6 p-4">
                 Navigation
             </p>
             <div className="text-sm md:text-md flex flex-row md:flex-col gap-3 pb-0 md:pb-4 border-b-2 overflow-x-auto flex-grow">
@@ -59,7 +59,7 @@ const ProfileNav = () => {
                         {navLink.label}
                     </button>
                 ))}
-            </div>
+            </div> */}
             <div className="text-sm md:text-md p-2 md:p-4">
                 <button onClick={handleLogout} className='text-[#b12b29]'>
                     Logout
