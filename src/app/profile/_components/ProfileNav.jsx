@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/auth';
+import { useAuth } from '@/app/AuthContext'; 
+import { useOAuth2 } from '@/app/(auth)/_components/OAuth2RedirectHandler';
 
-const ProfileNav = () => {// Ensure this returns user session properly // Optional chaining to avoid errors
-
+const ProfileNav = () => {
     const navLinks = [
         {
             label: 'Dashboard',
@@ -28,18 +28,25 @@ const ProfileNav = () => {// Ensure this returns user session properly // Option
             href: 'password',
         },
     ];
-
     const router = useRouter();
-
+    const { logout: authLogout } = useAuth(); // Renaming the logout from AuthContext
+    const { logout: oauthLogout } = useOAuth2();
     const handleLogout = () => {
-        // Add your logout logic here, for example:
-        // await auth.logout(); // Replace with your actual logout logic
-        router.push('/'); // Redirect to home or login page after logout
-    };
+       
+        
+         // Renaming the logout from OAuth2Context
+      
+        // Call the logout from both contexts
+        authLogout();  // This will remove username from localStorage and update context
+        oauthLogout();  // This will clear the OAuth-related state
+      
+        // Redirect to home page after logout
+        router.push('/');
+      };
 
     return (
         <div className='bg-white'>
-            <p className="hidden md:block text-2xl font-bold pb-6 p-4">
+            {/* <p className="hidden md:block text-2xl font-bold pb-6 p-4">
                 Navigation
             </p>
             <div className="text-sm md:text-md flex flex-row md:flex-col gap-3 pb-0 md:pb-4 border-b-2 overflow-x-auto flex-grow">
@@ -52,7 +59,7 @@ const ProfileNav = () => {// Ensure this returns user session properly // Option
                         {navLink.label}
                     </button>
                 ))}
-            </div>
+            </div> */}
             <div className="text-sm md:text-md p-2 md:p-4">
                 <button onClick={handleLogout} className='text-[#b12b29]'>
                     Logout

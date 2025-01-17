@@ -36,13 +36,16 @@ const Page = ({ params }) => {
   const currentListing = slug || "";
 
   // Helper function to convert the string to a slug
-  const stringToSlug = (str) =>
-    str
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9 -]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/--+/g, "-");
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+  
+    return str
+      .toLowerCase()          
+      .trim()                 
+      .replace(/[^a-z0-9 -]/g, "")  
+      .replace(/\s+/g, "-")         
+      .replace(/--+/g, "-");       
+  }
 
   // Fetch product data
   useEffect(() => {
@@ -130,8 +133,9 @@ const Page = ({ params }) => {
       ? 'replacement-parts'
       : 'shop-supplies';
 
+      const slug = stringToSlug(listing);
     // Navigate to the specific product page with category and subcategory
-    router.push(`/${categorySlug}/${listing}`);
+    router.push(`/${categorySlug}/${slug}`);
   };
 
   const determineCategory = (product) => {
@@ -157,7 +161,7 @@ const Page = ({ params }) => {
         {/* Sidebar Section */}
         <div className="w-full md:w-1/5 bg-white h-fit">
           <div className="mb-4">
-            <SubCategories myProduct={myProduct} subCategory={slug} />
+            <SubCategories myProduct={myProduct} subCategory={subCategory.name} />
             <RelatedProduct subCategoryData={allSubCategory} />
             <PartTags tags={subCategory.tags || []} />
           </div>
@@ -183,7 +187,7 @@ const Page = ({ params }) => {
                 <span className="bg-gray-200 text-sm font-semibold px-2 rounded-md">Category</span>
               )}
             </div>
-            <h1 className="text-2xl font-bold py-2">{decodeURIComponent(slug) || "SubPart"}</h1>
+            <h1 className="text-2xl font-bold py-2">{subCategory.name || "SubPart"}</h1>
           </div>
 
           {/* Products Grid */}

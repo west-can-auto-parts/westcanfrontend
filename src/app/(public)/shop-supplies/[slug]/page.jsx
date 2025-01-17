@@ -9,9 +9,10 @@ import { PartSupplier } from "./_components/part-supplier";
 
 const Page = ({ params }) => {
   const slug = params.slug;
-  
 
   function stringToSlug(str) {
+    str = str.replace("&", "and");
+
     return str
       .toLowerCase()
       .trim()
@@ -25,17 +26,14 @@ const Page = ({ params }) => {
   const [categorySlug, setCategorySlug] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
   const [productId, setProductId] = useState(null);
-  const isProduction = process.env.NODE_ENV === 'production';
+  const [showPopup, setShowPopup] = useState(false);
+  const isProduction = process.env.NODE_ENV === "production";
   const apiUrl = isProduction
-    ? 'https://frontendbackend-production.up.railway.app/api/product'
-    : 'http://localhost:8080/api/product';
+    ? "https://frontendbackend-production.up.railway.app/api/product"
+    : "http://localhost:8080/api/product";
 
-  
-  // Refetch product data when productId or slug changes
   useEffect(() => {
-
     const fetchProduct = async () => {
       setLoading(true);
       try {
@@ -54,7 +52,15 @@ const Page = ({ params }) => {
     };
 
     fetchProduct();
-  }, [productId, slug]); // Added `slug` as a dependency
+  }, [slug]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPopup(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const determineCategory = (product) => {
     if (
@@ -67,6 +73,10 @@ const Page = ({ params }) => {
       setCategoryType("Tools & Equipments");
       setCategorySlug("tools");
     }
+  };
+
+  const closePopup = () => {
+    setShowPopup(false);
   };
 
   if (loading) {
@@ -101,25 +111,56 @@ const Page = ({ params }) => {
       <div className="w-full">
         <PartSupplier subCategoryName={myProduct.name} />
       </div>
-      {showPopup && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
 
-          {/* Close Button */}
-          <button
-            className="absolute -top-6 -right-6 bg-white text-[#b12b29] font-bold border-2 border-[#b12b29] rounded-full p-2 w-10 h-10 flex items-center justify-center hover:bg-[#b12b29] hover:text-white transition focus:outline-none shadow-md"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent the link from being triggered
-              closePopup(); // Close the popup
-            }}
-          >
-            ✕
-          </button>
-          <a
-            href="https://store.westcanauto.com/store/portal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative bg-[#b12b29] text-white shadow-lg border rounded-lg p-4 flex items-center gap-4 w-full max-w-lg cursor-pointer"
-          >
+      {showPopup && (
+        <>
+          {/* Desktop Popup */}
+          <div className="hidden md:block fixed bottom-0 left-1/2 transform -translate-x-1/2 z-50">
+            {/* Close Button */}
+            <button
+              className="absolute -top-10 -right-4 bg-white text-[#b12b29] font-bold border-2 border-[#b12b29] rounded-full p-2 w-10 h-10 flex items-center justify-center hover:bg-[#b12b29] hover:text-white transition focus:outline-none shadow-md"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent the link from being triggered
+                closePopup(); // Close the popup
+              }}
+            >
+              ✕
+            </button>
+            <a
+              href="https://store.westcanauto.com/store/portal"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative bg-[#b12b29] text-white shadow-lg border rounded-lg p-4 flex items-center gap-4 w-full max-w-lg cursor-pointer"
+            >
+              {/* Product Image */}
+              <div className="flex-shrink-0">
+                <img
+                  src={myProduct.imageUrl[0]} // Replace `imageUrl` with the correct field for product image
+                  alt={myProduct.name}
+                  className="w-16 h-16 object-cover rounded"
+                />
+              </div>
+
+              {/* Product Details */}
+              <div>
+                <h3 className="font-bold text-lg mb-1">{myProduct.name}</h3>
+                <p className="text-sm">{myProduct.description?.slice(0, 100)}...</p>
+              </div>
+            </a>
+          </div>
+
+          {/* Mobile Popup */}
+          <div className="block md:hidden fixed bottom-10 left-0 w-full z-50 bg-[#b12b29] text-white shadow-lg border-t p-4 flex items-center gap-4">
+            {/* Close Button */}
+            <button
+              className="absolute top-2 right-2 bg-white text-[#b12b29] font-bold border-2 border-[#b12b29] rounded-full p-2 w-8 h-8 flex items-center justify-center hover:bg-[#b12b29] hover:text-white transition focus:outline-none shadow-md"
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent the link from being triggered
+                closePopup(); // Close the popup
+              }}
+            >
+              ✕
+            </button>
 
             {/* Product Image */}
             <div className="flex-shrink-0">
@@ -131,13 +172,15 @@ const Page = ({ params }) => {
             </div>
 
             {/* Product Details */}
-            <div>
+            <div className="flex-grow">
               <h3 className="font-bold text-lg mb-1">{myProduct.name}</h3>
               <p className="text-sm">{myProduct.description?.slice(0, 100)}...</p>
             </div>
-          </a>
-        </div>
+          </div>
+        </>
       )}
+
+
     </div>
   );
 };

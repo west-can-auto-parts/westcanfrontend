@@ -11,8 +11,6 @@ export const PartSupplier = ({ subCategoryName }) => {
   // Ensure `mySubPart` is valid and has the required property
   const currentListing = subCategoryName || "";
 
-  console.log('mySubPart: ',subCategoryName);
-
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
     ? 'https://frontendbackend-production.up.railway.app/api/suppliers'

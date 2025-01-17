@@ -5,12 +5,13 @@ import { FaShoppingCart, FaEnvelope } from 'react-icons/fa';
 import React, { useState, useEffect } from 'react';
 import locations from '@/datas/store';
 import Select from "react-select";
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const apiUrl = isProduction
     ? 'https://frontendbackend-production.up.railway.app/api/product'
     : 'http://localhost:8080/api/product';
+
 export const ProductDescription = ({ myProduct }) => {
     const [product, setProduct] = useState(myProduct || {});
     const [error, setError] = useState(null);
@@ -27,19 +28,30 @@ export const ProductDescription = ({ myProduct }) => {
     const [formSuccess, setFormSuccess] = useState('');
     const [categories, setCategories] = useState([]);
     const [isHovering, setIsHovering] = useState(false);
-    const router = useRouter()
+    const router = useRouter();
 
-    // Toggle Modal visibility
+    const storeOptions = locations.map((location) => ({
+        label: location.name,
+        value: location.name,
+    }));
+    
+    // Update handleInputChange to handle react-select for store
+    const handleStoreChange = (selectedOption) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            store: selectedOption ? selectedOption.value : '',
+        }));
+    };
+
     const handleModalToggle = () => {
         setIsModalOpen(!isModalOpen);
         if (!isModalOpen) {
             setFormData((prevData) => ({
-                ...prevData, // Default part when modal opens
+                ...prevData,
             }));
         }
     };
 
-    // Handle input change
     const handleInputChange = (event) => {
         const { id, value } = event.target;
         setFormData((prevData) => ({ ...prevData, [id]: value }));
@@ -47,7 +59,7 @@ export const ProductDescription = ({ myProduct }) => {
 
     const fetchCategories = async () => {
         try {
-            const response = await fetch(`${apiUrl}/product-category/all`); // Update the API endpoint as needed
+            const response = await fetch(`${apiUrl}/product-category/all`);
             if (response.ok) {
                 return await response.json();
             }
@@ -70,7 +82,6 @@ export const ProductDescription = ({ myProduct }) => {
         setFormData((prev) => ({ ...prev, productName: selectedParts }));
     };
 
-    // Handle form submission
     const handleSubmit = async (event) => {
         event.preventDefault();
         setFormError('');
@@ -90,20 +101,14 @@ export const ProductDescription = ({ myProduct }) => {
                 body: JSON.stringify(formData),
             });
 
-            // Check if the response is ok (status code 200-299)
             if (response.ok) {
                 const contentType = response.headers.get('content-type');
-                let responseData;
-
-                if (contentType && contentType.includes('application/json')) {
-                    responseData = await response.json();
-                } else {
-                    responseData = await response.text();
-                }
+                const responseData = contentType?.includes('application/json')
+                    ? await response.json()
+                    : await response.text();
 
                 setFormSuccess(responseData || 'Enquiry submitted successfully.');
 
-                // Reset form and close modal
                 setFormData({
                     name: '',
                     email: '',
@@ -112,7 +117,7 @@ export const ProductDescription = ({ myProduct }) => {
                     productName: [],
                     message: ''
                 });
-                setIsModalOpen(false); // Close the modal
+                setIsModalOpen(false);
             } else {
                 const errorText = await response.text();
                 setFormError(errorText || 'Failed to submit enquiry.');
@@ -121,13 +126,13 @@ export const ProductDescription = ({ myProduct }) => {
             setFormError('An error occurred while submitting the enquiry.');
         }
     };
+    console.log(isHovering)
 
     return (
-        <div className='w-full md:w-1/2'>
+        <div className="w-full md:w-1/2">
             {isHovering && (
                 <div
                     className="absolute bottom-[15%] transform -translate-x-1/2 translate-x-12 bg-[#b12b29] text-white text-sm rounded-md p-2 shadow-lg z-50 mt-2"
-
                 >
                     Click the SHOP NOW button below to find the perfect brake rotors for your vehicle!
                 </div>
@@ -136,24 +141,23 @@ export const ProductDescription = ({ myProduct }) => {
             <p className="text-xs md:text-sm text-justify">{myProduct.description}</p>
             <div className="py-2 flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm">
                 {myProduct.tags.map((tag, index) => (
-                    <p key={index} className='bg-gray-200 font-semibold px-2 rounded-md'>{tag}</p>
+                    <p key={index} className="bg-gray-200 font-semibold px-2 rounded-md">{tag}</p>
                 ))}
             </div>
             <Usps />
             <div className="flex flex-col md:flex-row md:flex-nowrap w-full gap-2 md:gap-4">
-
                 <button
-                    className='bg-white border-2 rounded-md px-4 py-2 text-[#b12b29] w-full md:w-1/2 flex justify-center gap-2'
+                    className="bg-white border-2 rounded-md px-4 py-2 text-[#b12b29] w-full md:w-1/2 flex justify-center gap-2"
                     onClick={handleModalToggle}
                 >
-                    <FaEnvelope className='w-5 h-5' /> Message Us
+                    <FaEnvelope className="w-5 h-5" /> Message Us
                 </button>
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white w-11/12 mx-auto md:max-w-xl p-6 rounded-lg shadow-lg">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg md:text-2xl font-bold">Enquiry Form</h2>
-                                <button onClick={handleModalToggle} type="button" className="bg-[#b21b29] text-white px-2 rounded-md">
+                                <button onClick={handleModalToggle} className="bg-[#b12b29] text-white px-2 rounded-md">
                                     X
                                 </button>
                             </div>
@@ -186,19 +190,14 @@ export const ProductDescription = ({ myProduct }) => {
                                     <label htmlFor="store" className="block text-sm font-medium text-gray-700">
                                         Select Store
                                     </label>
-                                    <select
-                                        id="store"
-                                        value={formData.store}
-                                        onChange={handleInputChange}
-                                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#b21b29] focus:border-[#b21b29]"
-                                    >
-                                        <option value="">Select Your Nearest Store</option>
-                                        {locations.map((location) => (
-                                            <option key={location.name} value={location.name}>
-                                                {location.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <Select
+                                        options={storeOptions}
+                                        onChange={handleStoreChange}
+                                        value={storeOptions.find((option) => option.value === formData.store)}
+                                        className="basic-single"
+                                        classNamePrefix="select"
+                                        placeholder="Select Your Nearest Store"
+                                    />
                                 </div>
                                 <div className="mb-4">
                                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
@@ -240,22 +239,24 @@ export const ProductDescription = ({ myProduct }) => {
                                 </div>
                                 {formError && <div className="text-red-600 mb-4">{formError}</div>}
                                 {formSuccess && <div className="text-green-600 mb-4 text-center">{formSuccess}</div>}
-                                <div className="flex justify-between">
-                                    <button type="submit" className="w-full bg-[#b21b29] text-white px-4 py-2 rounded-md hover:bg-[#a1121d]">
-                                        Submit
-                                    </button>
-                                </div>
+                                <button type="submit" className="w-full bg-[#b12b29] text-white px-4 py-2 rounded-md hover:bg-[#a1121d]">
+                                    Submit
+                                </button>
                             </form>
                         </div>
                     </div>
                 )}
                 <button
-                    className='bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2'
-                    onClick={() => router.push('https://store.westcanauto.com/store/portal')}
-                    onMouseEnter={() => setIsHovering(true)} // Show popup on hover
+                    className="bg-[#b12b29] text-white px-4 py-2 rounded-md w-full md:w-1/2 flex justify-center gap-2"
+                    onClick={() => window.open('https://store.westcanauto.com/store/portal', '_blank')}
+                    onMouseEnter={() => {
+                        if (window.innerWidth >= 768) { 
+                          setIsHovering(true);
+                        }
+                      }}
                     onMouseLeave={() => setIsHovering(false)}
                 >
-                    <FaShoppingCart className='w-5 h-5' /> Shop Now
+                    <FaShoppingCart className="w-5 h-5" /> Shop Now
                 </button>
             </div>
         </div>

@@ -1,187 +1,198 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-
-import { useRouter } from 'next/navigation';
-
-import { HiLocationMarker, HiUser } from 'react-icons/hi';
-import { FaMagnifyingGlass, FaWhatsapp, FaChevronRight } from 'react-icons/fa6';
-
-import parts from '@/datas/catalogue'
-
+import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { HiLocationMarker, HiUser } from "react-icons/hi";
+import { FaMagnifyingGlass } from "react-icons/fa6";
 
 const OnScrollNav = () => {
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(false);
   const searchBoxRef = useRef(null);
+  const [prevScrollY, setPrevScrollY] = useState(0);
+  const [searchResults, setSearchResults] = useState([]);
+  const router = useRouter();
 
-  const router = useRouter()
+  const apiUrl = "http://localhost:8080/api";
 
-  const toggleMenu = () => {
-    setIsMenuOpen(prev => !prev);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+  
+      // Reset the search bar on scroll
+      setSearchQuery("");
+      setShowResults(false);
+  
+      // Update navbar visibility based on scroll direction
+      setShowNavbar(currentScrollY > prevScrollY && currentScrollY > 100);
+      setPrevScrollY(currentScrollY);
+    };
+  
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollY]);
+  
 
-  const toggleCategory = (category) => {
-    setExpandedCategory(prev => prev === category ? null : category);
-  };
+  const handleSearch = async (query) => {
+    if (query.length < 3) {
+      setSearchResults(null);
+      setShowResults(false);
+      return;
+    }
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    const allItems = parts.flatMap(category =>
-      category.subParts.flatMap(subPart =>
-        subPart.parts.map(part => ({
-          label: part.listing,
-          description: part.description,
-          tags: [category.title, ...category.tags, subPart.listing, ...subPart.tags, ...part.tags],
-          href: `/shop/${category.title}/${subPart.listing}/${part.listing}`,
-          image: part.imageUrl || part.imgUrl
-        }))
-      )
-    );
-    const results = filterItemsByTags(allItems, searchQuery);
-    setSearchResults(results);
-    setShowResults(true);
-  };
+    try {
+      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        console.error("Search API returned an error:", response.status);
+        setSearchResults(null);
+        setShowResults(false);
+        return;
+      }
 
-  const filterItemsByTags = (items, query) => {
-    const queryTags = query.toLowerCase().split(' ').filter(tag => tag);
-    return items.filter(item =>
-      queryTags.every(queryTag =>
-        item.tags.some(tag => tag.toLowerCase().includes(queryTag))
-      )
-    );
-  };
-
-  const handleClickOutside = (event) => {
-    if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
-      setSearchQuery('')
+      const data = await response.json();
+      setSearchResults(data);
+      setShowResults(true);
+    } catch (error) {
+      console.error("Error fetching search results:", error);
+      setSearchResults(null);
       setShowResults(false);
     }
-  };
-
-  const handleCloseSearch = () => {
-    setSearchQuery('');
-    setShowResults(false);
-
   };
 
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
-    if (query) {
-      handleSearch(event);
+    if (query.length >= 3) {
+      handleSearch(query);
     } else {
       setSearchResults([]);
       setShowResults(false);
     }
   };
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    if (searchQuery) {
-      router.push(`/search/${searchQuery}`);
-    }
-    setShowResults(false)
+  const handleResultClick = (listing, category) => {
+    const categorySlug =
+      category === "Replacement Parts" || category === "Fluids & Lubricants"
+        ? "replacement-parts"
+        : "shop-supplies";
+
+    router.push(`/${categorySlug}/${listing}`);
+    setShowResults(false);
   };
 
-  const handleResultClick = (href) => {
-    router.push(href);
-    setShowResults(false)
+  const handleSubCategoryClick = (listing) => {
+    router.push(`/shop/${listing}`);
+    setShowResults(false);
   };
 
   useEffect(() => {
-    // Add event listener to detect clicks outside
-    document.addEventListener('mousedown', handleClickOutside);
-
-    // Clean up the event listener on component unmount
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+    const handleClickOutside = (event) => {
+      if (searchBoxRef.current && !searchBoxRef.current.contains(event.target)) {
+        setSearchQuery("");
+        setShowResults(false);
+      }
     };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-  const [showNavbar, setShowNavbar] = useState(false);
-  const [prevScrollY, setPrevScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > prevScrollY && currentScrollY > 100) {
-        // Scrolling down
-        setShowNavbar(true);
-      } else {
-        // Scrolling up
-        setShowNavbar(false);
-      }
-      setPrevScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [prevScrollY]);
-
   const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Shop by Category', href: '/shop' },
-    { label: 'About Us', href: '/about-us' },
-    { label: 'Contact', href: '/contact-us' },
+    { label: "Home", href: "/" },
+    { label: "Shop by Category", href: "/shop" },
+    { label: "About Us", href: "/about-us" },
+    { label: "Contact", href: "/contact-us" },
   ];
 
   return (
-    <nav className={` md:block z-50 fixed top-0 left-0 w-full bg-white border-[1px solid] py-3 transition-transform duration-300 shadow-md ${showNavbar ? 'translate-y-0' : '-translate-y-full'}`}>
-      <div className="w-10/12 mx-auto">
-        <ul className="flex justify-between items-center">
-          <li className='flex justify-start gap-4 items-center'>
-            <Link href={'/'}>
-              <img src="https://westcanauto.com/wp-content/uploads/2023/05/WestCanAP_logoNOUSI-300x156.png" alt="Logo" className='w-[75px] lg:w-[100px]' />
+    <nav
+      className={`md:block z-50 fixed top-0 left-0 w-full bg-white border-[1px solid] py-3 transition-transform duration-300 shadow-md ${
+        showNavbar ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
+      <div className="w-11/12 mx-auto flex items-center justify-between gap-4">
+        {/* Logo */}
+        <Link href="/">
+          <img
+            src="https://westcanauto.com/wp-content/uploads/2023/05/WestCanAP_logoNOUSI-300x156.png"
+            alt="Logo"
+            className="w-[75px] lg:w-[100px]"
+          />
+        </Link>
+
+        {/* Search Bar */}
+        <div className="flex-1 mx-4">
+          <form className="relative" ref={searchBoxRef}>
+            <input
+              type="text"
+              className="w-full bg-gray-100 h-10 pl-4 pr-10 rounded-md text-sm"
+              placeholder="Enter Keyword or Part Number"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            <button
+              type="button"
+              className="absolute top-1/2 right-2 transform -translate-y-1/2 text-gray-600"
+            >
+              <FaMagnifyingGlass className="w-5 h-5" />
+            </button>
+            {showResults && (searchResults?.ProductCategory?.length > 0 || searchResults?.SubCategory?.length > 0) && (
+              <div
+                className="absolute top-full mt-2 bg-white border border-gray-300 shadow-lg z-50 w-full max-h-48 overflow-y-auto"
+              >
+                {/* Render ProductCategory Results */}
+                {searchResults.ProductCategory?.length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg px-2 py-1">Product Categories</h3>
+                    {searchResults.ProductCategory.slice(0, 5).map((product) => (
+                      <div
+                        key={product.id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleResultClick(product.name, product.categoryName)}
+                      >
+                        <p className="font-semibold">{product.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Render SubCategory Results */}
+                {searchResults.SubCategory?.length > 0 && (
+                  <div>
+                    <h3 className="font-bold text-lg px-2 py-1">Sub Categories</h3>
+                    {searchResults.SubCategory.slice(0, 5).map((subcategory) => (
+                      <div
+                        key={subcategory.id}
+                        className="p-2 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleSubCategoryClick(subcategory.name)}
+                      >
+                        <p className="font-semibold">{subcategory.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center gap-2">
+          <button className="hidden md:block bg-[#b12b29] text-white px-3 py-2 rounded-md">
+            <Link href="/store" className="flex items-center gap-2">
+              <span>Our Stores</span>
+              <HiLocationMarker className="h-4 w-4" />
             </Link>
-            <form className="relative" ref={searchBoxRef} onSubmit={handleSearchSubmit}>
-              <input
-                type="text"
-                className='hidden md:block bg-gray-100 h-full pl-4 pr-2 py-2 gap-4 w-[300px] lg:w-[500px]'
-                placeholder='Enter Keyword or Part Number'
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-              <button type='submit' className='absolute top-1/2 right-2 transform -translate-y-1/2'>
-                <FaMagnifyingGlass className='hidden md:block w-5 h-5 text-gray-600' />
-              </button>
-              {showResults && searchResults.length > 0 && (
-                <div className='absolute top-full mt-2 bg-white border border-gray-300 shadow-lg z-50 w-full'>
-                  {searchResults.map((result) => (
-                    <div key={result.href} className='p-2 hover:bg-gray-100 cursor-pointer' onClick={() => { handleResultClick(result.href); setShowResults(false) }}>
-                      <p className='font-semibold'>{result.label}</p>
-                      <p className='text-sm text-gray-600'>{result.description}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </form>
-          </li>
-          <li>
-            <ul className="flex space-x-2 text-xs items-center">
-
-              <button className='hidden md:block bg-[#b12b29] text-white px-4 py-2 rounded-md'>
-                <Link href={'/store'} className='text-xs flex items-center gap-2'>
-                  <span className='hidden md:block'>Our Stores </span><HiLocationMarker className='h-4 w-4' />
-                </Link>
-              </button>
-              <button className='bg-[#b12b29] text-white px-4 py-2 rounded-md'>
-                <Link href={'/profile'} className='text-xs flex items-center gap-2'>
-                  <span className='block'>
-                  My Account</span> <HiUser className='h-4 w-4' />
-                </Link>
-              </button>
-            </ul>
-          </li>
-
-
-        </ul>
+          </button>
+          <button className="bg-[#b12b29] text-white px-3 py-2 rounded-md">
+            <Link href="/profile" className="flex items-center gap-2">
+              <HiUser className="h-4 w-4 md:h-auto md:w-auto" />
+              <span className="hidden md:inline">My Account</span>
+            </Link>
+          </button>
+        </div>
       </div>
     </nav>
   );

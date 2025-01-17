@@ -2,21 +2,18 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { FaMagnifyingGlass, FaBars, FaCar, FaHeart, FaPersonCircleCheck, FaCartShopping, FaXmark, FaWhatsapp, FaChevronRight } from 'react-icons/fa6';
-import { HiUser } from 'react-icons/hi';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import PreHeader from './PreHeader'
 import HeaderMenu from './HeaderMenu'
 import OnScrollHeader from '../OnScrollHeader/OnScrollNav'
-
-import parts from '@/datas/catalogue'
 import { BiUser } from 'react-icons/bi';
-import {UserButton} from './_components/user-button'
+import { UserButton } from './_components/user-button'
 
 const navItems = [
   { label: 'Home', href: '/' },
-  { label: 'Shop All', href: '/shop' },
+  { label: 'Shop All', href: '/categories' },
   { label: 'About Us', href: '/about-us' },
   { label: 'Contact', href: '/contact-us' },
   { label: 'Blogs', href: '/blogs' },
@@ -26,47 +23,45 @@ const navItems = [
 
 const MainContent = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [showNavbar, setShowNavbar] = useState(false);
+  const [prevScrollY, setPrevScrollY] = useState(0);
   const searchBoxRef = useRef(null);
 
   const router = useRouter()
+
+  const apiUrl = 'http://localhost:8080/api';
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
   };
 
-  const toggleCategory = (category) => {
-    setExpandedCategory(prev => prev === category ? null : category);
-  };
+  const handleSearch = async (query) => {
+    if (query.length < 3) {
+      setSearchResults(null);
+      setShowResults(false);
+      return;
+    }
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    const allItems = parts.flatMap(category =>
-      category.subParts.flatMap(subPart =>
-        subPart.parts.map(part => ({
-          label: part.listing,
-          description: part.description,
-          tags: [category.title, ...category.tags, subPart.listing, ...subPart.tags, ...part.tags],
-          href: `/shop/${category.title}/${subPart.listing}/${part.listing}`,
-          image: part.imageUrl || part.imgUrl
-        }))
-      )
-    );
-    const results = filterItemsByTags(allItems, searchQuery);
-    setSearchResults(results);
-    setShowResults(true);
-  };
+    try {
+      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(query)}`);
+      if (!response.ok) {
+        console.error('Search API returned an error:', response.status);
+        setSearchResults(null);
+        setShowResults(false);
+        return;
+      }
 
-  const filterItemsByTags = (items, query) => {
-    const queryTags = query.toLowerCase().split(' ').filter(tag => tag);
-    return items.filter(item =>
-      queryTags.every(queryTag =>
-        item.tags.some(tag => tag.toLowerCase().includes(queryTag))
-      )
-    );
+      const data = await response.json();
+      setSearchResults(data);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setSearchResults(null);
+      setShowResults(false);
+    }
   };
 
   const handleClickOutside = (event) => {
@@ -79,26 +74,70 @@ const MainContent = () => {
   const handleSearchChange = (event) => {
     const query = event.target.value;
     setSearchQuery(query);
-    if (query) {
-      handleSearch(event);
+    if (query.length >= 3) {
+      handleSearch(query); // Pass the query string, not the event object
     } else {
       setSearchResults([]);
       setShowResults(false);
     }
   };
 
-  const handleSearchSubmit = (event) => {
-    event.preventDefault();
-    if (searchQuery) {
-      router.push(`/search/${searchQuery}`);
+
+  const handleSearchSubmit = async (event) => {
+    event.preventDefault(); // Prevent form submission
+    if (searchQuery.length < 3) {
+      return;
     }
-    setShowResults(false)
+
+    try {
+      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(searchQuery)}`);
+      if (!response.ok) {
+        console.error('Search API returned an error:', response.status);
+        setSearchResults(null);
+        setShowResults(false);
+        return;
+      }
+
+      const data = await response.json();
+      setSearchResults(data);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
+      setSearchResults(null);
+      setShowResults(false);
+    }
   };
 
-  const handleResultClick = (href) => {
-    router.push(href);
-    setShowResults(false)
+
+  const handleResultClick = (listing,category) => {
+    const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
+    ? 'replacement-parts'
+    : 'shop-supplies';
+
+  // Navigate to the specific product page with category and subcategory
+  router.push(`/${categorySlug}/${listing}`);
   };
+
+  const handleSubCategoryClick = (listing) => {
+  router.push(`/shop/${listing}`);
+  };
+
+    useEffect(() => {
+      const handleScroll = () => {
+        const currentScrollY = window.scrollY;
+    
+        // Reset the search bar on scroll
+        setSearchQuery("");
+        setShowResults(false);
+    
+        // Update navbar visibility based on scroll direction
+        setShowNavbar(currentScrollY > prevScrollY && currentScrollY > 100);
+        setPrevScrollY(currentScrollY);
+      };
+    
+      window.addEventListener("scroll", handleScroll);
+      return () => window.removeEventListener("scroll", handleScroll);
+    }, [prevScrollY]);
 
   useEffect(() => {
     // Add event listener to detect clicks outside
@@ -137,36 +176,6 @@ const MainContent = () => {
                 </li>
               ))}
             </ul>
-            <ul className='py-2 my-2'>
-              <li className='py-1 my-2'>
-                <p className='text-sm font-semibold text-gray-700'>Shop All</p>
-                <ul className="list-none mt-2">
-
-                  {parts.map(part => part.subParts.map(subPart => (
-                    <li key={subPart.listing} className='py-1'>
-                      <div
-                        className='cursor-pointer text-gray-700 flex justify-between items-center'
-                        onClick={() => toggleCategory(subPart.listing)}
-                      >
-                        <span className='text-sm'>{subPart.listing}</span>
-                        <span className={`transform transition-transform ${expandedCategory === subPart.listing ? 'rotate-90' : ''}`}>
-                          <FaChevronRight className='h-3 w-3' />
-                        </span>
-                      </div>
-                      {expandedCategory === subPart.listing && (
-                        <ul className="list-none mt-2 pl-4">
-                          {subPart.parts.map((subcategory) => (
-                            <li key={subcategory.listing} className=' my-2 text-sm text-gray-600' onClick={() => { router.push(`/shop/${part.title}/${subPart.listing}/${subcategory.listing}`); setIsMenuOpen(false) }}>
-                              {subcategory.listing}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  )))}
-                </ul>
-              </li>
-            </ul>
           </div>
           <div className="image-container">
             <Link href={'/'}>
@@ -184,33 +193,67 @@ const MainContent = () => {
               <button type='submit' className='absolute top-1/2 right-2 transform -translate-y-1/2'>
                 <FaMagnifyingGlass className='w-5 h-5 text-gray-600' />
               </button>
-              {showResults && searchResults.length > 0 && (
+              {showResults && (searchResults?.ProductCategory?.length > 0 || searchResults?.SubCategory?.length > 0) && (
                 <div className='absolute top-full mt-2 bg-white border border-gray-300 shadow-lg z-50 w-full'>
-                  {searchResults.map((result) => (
-                    <div key={result.href} className='p-2 hover:bg-gray-100 cursor-pointer' onClick={() => { handleResultClick(result.href); setShowResults(false) }}>
-                      <p className='font-semibold'>{result.label}</p>
-                      <p className='text-sm text-gray-600'>{result.description}</p>
+                  {/* Render ProductCategory Results */}
+                  {searchResults.ProductCategory?.length > 0 && (
+                    <div>
+                      <h3 className='font-bold text-lg px-2 py-1'>Product Categories</h3>
+                      {searchResults.ProductCategory.map((product) => (
+                        <div
+                          key={product.id}
+                          className='p-2 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => {
+                            handleResultClick(product.name,product.categoryName); // Example href generation for ProductCategory
+                            setShowResults(false);
+                          }}
+                        >
+                          <p className='font-semibold'>{product.name}</p>
+                          {/* <p className='text-sm text-gray-600'>{product.description}</p> */}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+
+                  {/* Render SubCategory Results */}
+                  {searchResults.SubCategory?.length > 0 && (
+                    <div>
+                      <h3 className='font-bold text-lg px-2 py-1'>Sub Categories</h3>
+                      {searchResults.SubCategory.map((subcategory) => (
+                        <div
+                          key={subcategory.id}
+                          className='p-2 hover:bg-gray-100 cursor-pointer'
+                          onClick={() => {
+                            handleSubCategoryClick(subcategory.name); // Example href generation for SubCategory
+                            setShowResults(false);
+                          }}
+                        >
+                          <p className='font-semibold'>{subcategory.name}</p>
+                          {/* <p className='text-sm text-gray-600'>{subcategory.description}</p> */}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
+
             </form>
           </div>
         </div>
-        
+
         <div className='flex gap-4 items-center'>
-        <div className='flex gap-2 items-center'>
-          <div className='hidden md:block bg-green-500 text-white rounded-md md:rounded-full p-2'>
-            <FaWhatsapp className='h-6 w-6' />
-          </div>
-          <Link href={'https://wa.me/16045948800'} target='_blank' className='hidden md:flex items-center justify-end gap-2'>
-            <div className='hidden lg:block'>
-              <p className="text-xs text-gray-500">Chat With Us </p>
-              <p className='font-semibold'>On WhatsApp</p>
+          <div className='flex gap-2 items-center'>
+            <div className='hidden md:block bg-green-500 text-white rounded-md md:rounded-full p-2'>
+              <FaWhatsapp className='h-6 w-6' />
             </div>
-          </Link>
-        </div>
-        <UserButton/>
+            <Link href={'https://wa.me/16045948800'} target='_blank' className='hidden md:flex items-center justify-end gap-2'>
+              <div className='hidden lg:block'>
+                <p className="text-xs text-gray-500">Chat With Us </p>
+                <p className='font-semibold'>On WhatsApp</p>
+              </div>
+            </Link>
+          </div>
+          <UserButton />
         </div>
       </div>
     </div>
