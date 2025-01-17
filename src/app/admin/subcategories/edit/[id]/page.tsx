@@ -38,7 +38,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
 
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://adminbackend-production-6c17.up.railway.app/admin/api'
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
 
   // Fetch the subcategory and categories to edit
