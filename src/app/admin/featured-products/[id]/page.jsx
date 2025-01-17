@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
-import parts from '@/datas/catalogue'; // Import predefined categories and subcategories
 
 const EditProductPage = ({params}) => {
     const {id} = params
