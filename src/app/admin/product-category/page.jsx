@@ -5,7 +5,6 @@ import axios from 'axios';
 
 import { CldUploadWidget } from 'next-cloudinary';
 
-import parts from '@/datas/catalogue';
 const AddProductCategory = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');

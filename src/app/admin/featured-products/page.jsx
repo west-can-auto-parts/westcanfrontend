@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { CldUploadWidget } from 'next-cloudinary';
-import parts from '@/datas/catalogue'; // Assume this imports predefined categories and subcategories
 
 const AddFeaturedProduct = () => {
   const [formData, setFormData] = useState({
