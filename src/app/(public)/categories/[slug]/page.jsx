@@ -9,7 +9,6 @@ import { PartSupplier } from './_components/part-supplier';
 
 
 import suppliers from '@/datas/suppliers'
-import parts from '@/datas/catalogue';
 
 const page = ({ params }) => {
   const slug = params.slug;
