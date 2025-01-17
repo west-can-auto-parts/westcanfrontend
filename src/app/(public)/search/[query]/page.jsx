@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import parts from '@/datas/catalogue'
 import { useRouter } from 'next/navigation';
 const Page = ({ params }) => {
 

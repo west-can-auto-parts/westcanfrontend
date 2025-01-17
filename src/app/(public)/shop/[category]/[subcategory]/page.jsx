@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
-import parts from '@/datas/catalogue'
 
 import { ImageGallery } from './_components/image-gallery'
 import { ProductDescription } from './_components/product-description'

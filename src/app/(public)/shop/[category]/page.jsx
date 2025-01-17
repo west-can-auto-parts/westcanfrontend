@@ -3,14 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { FaChevronRight } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import parts from "@/datas/catalogue";
 import Link from "next/link";
-import suppliers from "@/datas/suppliers";
 
 import { RelatedProduct } from "./_components/related-product";
 import { SubCategories } from "./_components/sub-categories";
 import { AboutPart } from "./_components/about-part";
-import { PartSupplier } from "./_components/part-supplier";
 import { PartTags } from "./_components/part-tags";
 
 
