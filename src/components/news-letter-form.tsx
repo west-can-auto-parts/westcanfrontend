@@ -10,7 +10,7 @@ export  const NewsletterForm = () => {
 
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-production.up.railway.app/api'
+    ? 'https://frontendbackend-wn0p.onrender.com/api'
     : 'http://localhost:8080/api';
 
  const handleSubmit = async (e: React.FormEvent) => {

@@ -20,7 +20,7 @@ const CreateJobPage = () => {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-production.up.railway.app/api/jobs'
+    ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
     : 'http://localhost:8080/api/jobs';
 
   const handleCreate = async () => {

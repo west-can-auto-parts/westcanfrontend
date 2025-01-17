@@ -32,7 +32,7 @@ const Page = ({ params }) => {
   const [showPopup, setShowPopup] = useState(false);
   const isProduction = process.env.NODE_ENV === "production";
   const apiUrl = isProduction
-    ? "https://frontendbackend-production.up.railway.app/api/product"
+    ? "https://frontendbackend-wn0p.onrender.com/api/product"
     : "http://localhost:8080/api/product";
 
   useEffect(() => {

@@ -11,7 +11,7 @@ import suppliers from '@/datas/suppliers';
 
 const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-production.up.railway.app/api/blog'
+    ? 'https://frontendbackend-wn0p.onrender.com/api/blog'
     : 'http://localhost:8080/api/blog';
 const fetchBlogs = async () => {
     const response = await fetch(apiUrl);
