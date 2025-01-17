@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import parts from "@/datas/catalogue";
 
 export const MainContentView = () => {
 
