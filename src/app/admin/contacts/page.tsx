@@ -179,7 +179,7 @@ const AdminContactsPage = () => {
                   <>
                     <td className="border p-2">{item.firstName}</td>
                     <td className="border p-2">{item.lastName}</td>
-                    <td className="border p-2">{item.company || "N/A"}</td>
+                    <td className="border p-2">{item.companyName || "N/A"}</td>
                     <td className="border p-2">{item.email}</td>
                     <td className="border p-2">{item.phoneNumber}</td>
                     <td className="border p-2">{item.message}</td>

@@ -23,6 +23,10 @@ const Page: React.FC = () => {
   const router = useRouter();
   const { logout: authLogout } = useAuth(); // Renaming the logout from AuthContext
   const { logout: oauthLogout } = useOAuth2();
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+      ? 'https://frontendbackend-wn0p.onrender.com/api'
+      : 'http://localhost:8080/api';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,7 +36,7 @@ const Page: React.FC = () => {
           throw new Error("No token found");
         }
 
-        const userResponse = await fetch("http://localhost:8080/api/user", {
+        const userResponse = await fetch(`${apiUrl}/user`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -76,7 +80,7 @@ const Page: React.FC = () => {
         throw new Error("Missing token or user data");
       }
 
-      const response = await fetch("http://localhost:8080/api/user/edit", {
+      const response = await fetch(`${apiUrl}/user/edit`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

@@ -18,6 +18,11 @@ export const SignInForm = () => {
 
   const router = useRouter();
 
+  const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+      ? 'https://frontendbackend-wn0p.onrender.com'
+      : 'http://localhost:8080';
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
@@ -35,7 +40,7 @@ export const SignInForm = () => {
     startTransition(async () => {
       try {
         // Sending the login request to the backend
-        const response = await fetch('http://localhost:8080/api/auth/sign-in', {
+        const response = await fetch(`${apiUrl}/api/auth/sign-in`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
