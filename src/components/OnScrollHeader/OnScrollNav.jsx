@@ -14,8 +14,11 @@ const OnScrollNav = () => {
   const [prevScrollY, setPrevScrollY] = useState(0);
   const [searchResults, setSearchResults] = useState([]);
   const router = useRouter();
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+      ? 'https://frontendbackend-wn0p.onrender.com/api'
+      : 'http://localhost:8080/api';
 
-  const apiUrl = "http://localhost:8080/api";
 
   useEffect(() => {
     const handleScroll = () => {

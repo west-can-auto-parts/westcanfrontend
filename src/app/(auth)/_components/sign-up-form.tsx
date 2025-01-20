@@ -17,6 +17,11 @@ export const SignUpForm = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const router = useRouter();
 
+  const isProduction = process.env.NODE_ENV === 'production';
+    const apiUrl = isProduction
+      ? 'https://frontendbackend-wn0p.onrender.com'
+      : 'http://localhost:8080';
+
   // Extend schema to include additional fields
   const ExtendedRegisterSchema = RegisterSchema.extend({
     phoneNumber: z.string().optional(),
@@ -45,7 +50,7 @@ export const SignUpForm = () => {
   const onSubmit = (values: z.infer<typeof ExtendedRegisterSchema>) => {
     startTransition(() => {
       axios
-        .post("http://localhost:8080/api/auth/sign-up", values)
+        .post(`${apiUrl}/api/auth/sign-up`, values)
         .then((response) => {
           const data = response.data;
           setSuccessMessage(data);

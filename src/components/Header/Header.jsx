@@ -31,8 +31,11 @@ const MainContent = () => {
   const searchBoxRef = useRef(null);
 
   const router = useRouter()
-
-  const apiUrl = 'http://localhost:8080/api';
+  
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+      ? 'https://frontendbackend-wn0p.onrender.com/api'
+      : 'http://localhost:8080/api';
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
