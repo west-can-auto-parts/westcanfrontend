@@ -2,6 +2,7 @@ const suppliers = [
     {
         brand: "RAYBESTOS",
         logoUrl: "https://res.cloudinary.com/dpeocx0yy/image/upload/v1725341037/raybestos-logo-1_nxhtib.jpg",
+        description:"A Legacy of Trust and InnovationFor over a century, Raybestos®has been a trusted name in automotive brake parts, known for innovation and reliability. Our journey began in 1902, and we've continued to evolve, earning a reputation you can count on.Our Dedication to Quality and InnovationOur team of engineers in McHenry, Illinois, works diligently to design a range of brake parts, including friction, rotors, drums, calipers, hub assemblies and hydraulics. These products are crafted to match or exceed OE fit, form, and function, ensuring your safety on the road.Rigorous Testing for Peace of MindSafety and reliability are our top priorities. Each Raybestos®product undergoes extensive testing to meet our high standards. From design to manufacturing to packaging, we're all about the details that set us apart.Local and Global ReachAs a global leader in brake parts, Raybestos®has manufacturing plants in North America and various locations worldwide, and is part ofFirst Brands Group. Our facilities proudly hold ISO/TS 16949 and ISO 9001 certifications, reinforcing our commitment to excellence.",
         headings: "Replacement Parts",
         categories: [
             {
@@ -175,6 +176,7 @@ const suppliers = [
     {
         brand: "DORMAN",
         logoUrl: "https://res.cloudinary.com/dpeocx0yy/image/upload/v1725341899/brand-dorman_q9tfui.jpg",
+        description:"People's lives and livelihoods depend upon cars and trucks. Dorman gives people greater freedom to fix these vehicles by constantly developing new repair solutions that put owners and installers first.Since 1918, we have been the automotive aftermarket’s pioneering problem solvers. We have released thousands of parts and components that people could once only buy from original equipment manufacturers. By always innovating, we have led the way in growing the aftermarket, providing more opportunity to individuals and businesses who depend on automotive maintenance. That’s why our catalog includes more than 118,000 products and grows every year.What makes us distinct from other aftermarket companies is our customer-first mindset. Everything we do is centered around providing customer value, both in the quality of our products, and the creativity of our solutions. Our engineers and designers go out of their way to save repair technicians time, and save vehicle owners money. The engine that powers us is our Culture of Contribution. We empower and celebrate new ideas throughout our organization, because that just means we have more ways to solve problems. Our family-run roots give us a spirit of entrepreneurship that accelerates our speed and agility. This is a rare combination in a fast-growing, global enterprise that makes Dorman a special place to work.",
         headings: "Replacement Parts",
         categories: [
             {

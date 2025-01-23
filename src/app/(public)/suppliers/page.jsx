@@ -3,15 +3,28 @@
 import React, { useState } from 'react';
 import suppliers from '@/datas/suppliers';
 import {FaChevronDown} from 'react-icons/fa'
+import { useRouter } from "next/navigation";
+
 
 const SuppliersPage = () => {
   const uniqueHeadings = [...new Set(suppliers.map(supplier => supplier.headings))];
   const [filteredSuppliers, setFilteredSuppliers] = useState(suppliers);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24; // Adjust as needed
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
+  }
+  
 
   const handleFilter = (heading) => {
     if (heading === 'All') {
@@ -42,6 +55,14 @@ const SuppliersPage = () => {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  const handleSupplierClick = (supplier) => {
+    const brand=stringToSlug(supplier.brand);
+    console.log('brand: ',brand);
+    router.push(`/suppliers/${(brand)}`);
+  };
+  
+  
 
   return (
     <section className='w-10/12 mt-2 md:mt-4 mx-auto flex flex-wrap md:flex-nowrap gap-4'>
@@ -98,7 +119,7 @@ const SuppliersPage = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {currentSuppliers.map((supplier, index) => (
             supplier.logoUrl ? (
-              <div key={index} className='bg-white p-3'>
+              <div key={index} className='bg-white p-3' onClick={() => handleSupplierClick(supplier)}>
                 <div
                   className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2"
                   style={{ backgroundImage: `url(${supplier.logoUrl})` }}
