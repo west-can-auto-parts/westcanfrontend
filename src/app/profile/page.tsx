@@ -23,17 +23,27 @@ const Page: React.FC = () => {
   const router = useRouter();
   const { logout: authLogout } = useAuth(); // Renaming the logout from AuthContext
   const { logout: oauthLogout } = useOAuth2();
-  const isProduction = process.env.NODE_ENV === 'production';
+  const isProduction = process.env.NODE_ENV === "production";
   const apiUrl = isProduction
-      ? 'https://frontendbackend-wn0p.onrender.com/api'
-      : 'http://localhost:8080/api';
+    ? "https://frontendbackend-wn0p.onrender.com/api"
+    : "http://localhost:8080/api";
 
+  // Logout function
+  const handleLogout = () => {
+    authLogout(); // Clear user-related state
+    oauthLogout(); // Clear OAuth-related state
+    router.push("/"); // Redirect to the home page
+  };
+
+  // Fetch user data
   useEffect(() => {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("jwt_token");
         if (!token) {
-          throw new Error("No token found");
+          console.error("No token found");
+          handleLogout();
+          return;
         }
 
         const userResponse = await fetch(`${apiUrl}/user`, {
@@ -42,6 +52,12 @@ const Page: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (userResponse.status === 401) {
+          console.error("Token is invalid or expired");
+          handleLogout();
+          return;
+        }
 
         if (!userResponse.ok) {
           throw new Error("Failed to fetch user data");
@@ -52,27 +68,25 @@ const Page: React.FC = () => {
         setEditedUser(userData);
       } catch (error) {
         console.error("Failed to fetch data:", error);
+        handleLogout(); // Logout on unexpected errors
       }
     };
 
     fetchData();
   }, []);
 
-  const handleLogout = () => {
-    authLogout();
-    oauthLogout();
-    router.push("/");
-  };
-
+  // Toggle edit mode
   const handleEditToggle = () => {
     setIsEditing((prev) => !prev);
   };
 
+  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setEditedUser((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
+  // Save updated user data
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("jwt_token");
@@ -119,7 +133,9 @@ const Page: React.FC = () => {
               disabled={!isEditing}
               onChange={handleChange}
               className={`font-bold text-xl text-center ${
-                isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+                isEditing
+                  ? "border border-gray-300 px-2"
+                  : "border-none bg-transparent focus:outline-none"
               }`}
             />
             <p className="text-sm text-gray-500">{user?.email || "useremail@site.com"}</p>
@@ -156,7 +172,9 @@ const Page: React.FC = () => {
             disabled={!isEditing}
             onChange={handleChange}
             className={`text-sm mb-3 w-full ${
-              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+              isEditing
+                ? "border border-gray-300 px-2"
+                : "border-none bg-transparent focus:outline-none"
             }`}
           />
           <p className="font-bold mb-1">Phone :</p>
@@ -167,21 +185,26 @@ const Page: React.FC = () => {
             disabled={!isEditing}
             onChange={handleChange}
             className={`text-sm mb-3 w-full ${
-              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+              isEditing
+                ? "border border-gray-300 px-2"
+                : "border-none bg-transparent focus:outline-none"
             }`}
           />
           <p className="font-bold mb-1">Nearest Store :</p>
-          {/* Nearest Store Dropdown */}
           <select
             name="nearestStore"
             value={editedUser?.nearestStore || ""}
             disabled={!isEditing}
             onChange={handleChange}
             className={`text-sm mb-3 w-full ${
-              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+              isEditing
+                ? "border border-gray-300 px-2"
+                : "border-none bg-transparent focus:outline-none"
             }`}
           >
-            <option value="" disabled>Select Store</option>
+            <option value="" disabled>
+              Select Store
+            </option>
             {locations.map((store, index) => (
               <option key={index} value={store.name}>
                 {store.name}
@@ -196,7 +219,9 @@ const Page: React.FC = () => {
             disabled={!isEditing}
             onChange={handleChange}
             className={`text-sm mb-3 w-full ${
-              isEditing ? "border border-gray-300 px-2" : "border-none bg-transparent focus:outline-none"
+              isEditing
+                ? "border border-gray-300 px-2"
+                : "border-none bg-transparent focus:outline-none"
             }`}
           />
         </div>
