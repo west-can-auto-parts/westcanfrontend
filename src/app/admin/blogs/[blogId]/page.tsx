@@ -59,12 +59,17 @@ const EditBlogPage = ({ params }: { params: { blogId: string } }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const apiUrl = 'http://localhost:8081/api/blog';
+  const isProduction = process.env.NODE_ENV === "production";
+    const apiUrl = isProduction
+    ? "https://adminbackend-r86i.onrender.com/admin/api"
+    : "http://localhost:8081/api/blog";
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   useEffect(() => {
     // Fetch blog post details based on ID
     const fetchBlogPost = async () => {
       try {
-        const response = await axios.get(`${apiUrl}/${blogId}`);
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await axios.get(`${apiUrl}/${blogId}`,{headers});
         const post = response.data;
 
         // Populate form data with existing post details

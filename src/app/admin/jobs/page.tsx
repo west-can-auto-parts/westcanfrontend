@@ -10,12 +10,14 @@ const JobsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
-    : 'http://localhost:8080/api/jobs';
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
   useEffect(() => {
     async function fetchJobs() {
       try {
-        const response = await fetch(apiUrl);
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/jobs/all`,{headers});
         if (!response.ok) throw new Error('Failed to fetch jobs');
         const data = await response.json();
         setJobs(data);

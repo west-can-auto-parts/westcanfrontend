@@ -10,20 +10,20 @@ import { SubCategories } from "./_components/sub-categories";
 import { AboutPart } from "./_components/about-part";
 import { PartTags } from "./_components/part-tags";
 
-
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 const apiUrl1 = isProduction
-  ? 'https://frontendbackend-wn0p.onrender.com/'
-  : 'http://localhost:8080/';
+  ? "https://frontendbackend-wn0p.onrender.com/"
+  : "http://localhost:8080/";
 
-const apiUrl = apiUrl1+'api/product';
-const apiUrl2 = apiUrl1+'api/suppliers';
+const apiUrl = apiUrl1 + "api/product";
+const apiUrl2 = apiUrl1 + "api/suppliers";
+
 const Page = ({ params }) => {
   const [myProduct, setMyProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [allSubCategory, setAllSubCategory] = useState([]);
-  const [subCategory, setSubCategory] = useState([]);
+  const [subCategory, setSubCategory] = useState({});
   const [suppliers, setSuppliers] = useState([]);
   const [categoryType, setCategoryType] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
@@ -32,110 +32,99 @@ const Page = ({ params }) => {
   const slug = params.category;
   const currentListing = slug || "";
 
-  // Helper function to convert the string to a slug
   function stringToSlug(str) {
-    str = str.replace("&", "and");
-  
     return str
-      .toLowerCase()          
-      .trim()                 
-      .replace(/[^a-z0-9 -]/g, "")  
-      .replace(/\s+/g, "-")         
-      .replace(/--+/g, "-");       
+      .toLowerCase()
+      .trim()
+      .replace("&", "and")
+      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
   }
 
-  // Fetch product data
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${apiUrl}/products-category/subCategoryName?subCategoryName=${slug}`);
-        if (!response.ok) throw new Error("Failed to fetch product data");
-        const data = await response.json();
-        setMyProduct(data);
-        determineCategory(data[0])
+        const [productRes, subCategoryRes, allSubCategoryRes] = await Promise.all([
+          fetch(`${apiUrl}/products-category/subCategoryName?subCategoryName=${slug}`),
+          fetch(`${apiUrl}/subcategory/${slug}`),
+          fetch(`${apiUrl}/subcategory`)
+        ]);
+
+        // Read responses as text first
+        const productText = await productRes.text();
+        const subCategoryText = await subCategoryRes.text();
+        const allSubCategoryText = await allSubCategoryRes.text();
+
+        if (!productText) throw new Error("Empty product response");
+        if (!subCategoryText) throw new Error("Empty subcategory response");
+        if (!allSubCategoryText) throw new Error("Empty subcategories response");
+
+        // Parse JSON
+        const productData = JSON.parse(productText);
+        const subCategoryData = JSON.parse(subCategoryText);
+        const allSubCategoryData = JSON.parse(allSubCategoryText);
+
+        setMyProduct(productData);
+        setSubCategory(subCategoryData);
+        setAllSubCategory(allSubCategoryData);
+        determineCategory(productData[0]);
+
       } catch (err) {
+        console.error("Error fetching data:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    fetchData();
   }, [slug]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/subcategory`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setAllSubCategory(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  // useEffect(() => {
+  //   if (!currentListing) return;
 
-    fetchData();
-  }, []);
+  //   const fetchSuppliers = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const response = await fetch(`${apiUrl2}/subcategory/search?query=${slug}`);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/subcategory/${slug}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-        const data = await response.json();
-        setSubCategory(data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  //       if (response.status === 204) {
+  //         setSuppliers([]); // Handle no content
+  //         return;
+  //       }
 
-    fetchData();
-  }, []);
+  //       const text = await response.text();
+  //       if (!text) throw new Error("Empty suppliers response");
 
+  //       const data = JSON.parse(text);
+  //       setSuppliers(data);
 
-  // Fetch suppliers by product category from the backend
-  useEffect(() => {
-    if (!currentListing) return;
+  //     } catch (err) {
+  //       console.error("Error fetching suppliers:", err);
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    const fetchSuppliers = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`${apiUrl2}/subcategory/search?query=${slug}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch suppliers");
-        }
-        const data = await response.json();
-        setSuppliers(data); // Set the suppliers data
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSuppliers();
-  }, [currentListing]);
+  //   fetchSuppliers();
+  // }, [currentListing]);
 
   const handleClick = (listing, category) => {
+    const categorySlug =
+      category === "Replacement Parts" || category === "Fluids & Lubricants"
+        ? "replacement-parts"
+        : "shop-supplies";
 
-    // Determine the category slug based on the category name
-    const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
-      ? 'replacement-parts'
-      : 'shop-supplies';
-
-      const slug = stringToSlug(listing);
-    // Navigate to the specific product page with category and subcategory
+    const slug = stringToSlug(listing);
     router.push(`/${categorySlug}/${slug}`);
   };
 
   const determineCategory = (product) => {
+    if (!product) return;
+    
     if (
       product.categoryName === "Replacement Parts" ||
       product.categoryName === "Fluids & Lubricants"
@@ -151,11 +140,9 @@ const Page = ({ params }) => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
-  // console.log('myProduct: ', myProduct)
   return (
     <>
       <div className="flex flex-col-reverse md:flex-row flex-wrap md:flex-nowrap w-10/12 mx-auto gap-8">
-        {/* Sidebar Section */}
         <div className="w-full md:w-1/5 bg-white h-fit">
           <div className="mb-4">
             <SubCategories myProduct={myProduct} subCategory={subCategory.name} />
@@ -164,7 +151,6 @@ const Page = ({ params }) => {
           </div>
         </div>
 
-        {/* Main Content Section */}
         <div className="w-full md:w-4/5 py-2 md:py-0">
           <div className="pb-2">
             <div className="flex flex-wrap gap-1 md:pb-4">
@@ -187,7 +173,6 @@ const Page = ({ params }) => {
             <h1 className="text-2xl font-bold py-2">{subCategory.name || "SubPart"}</h1>
           </div>
 
-          {/* Products Grid */}
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {myProduct?.map((product, index) => (
               <div key={index} className="cursor-pointer" onClick={() => handleClick(product.name, product.categoryName)}>
@@ -196,7 +181,8 @@ const Page = ({ params }) => {
                     <img
                       src={product.imageUrl?.[0] || "/placeholder.jpg"}
                       alt={product.name || "Product"}
-                      className="w-full h-[15vh] md:h-[20vh] object-cover object-center mb-4 rounded" />
+                      className="w-full h-[15vh] md:h-[20vh] object-cover object-center mb-4 rounded"
+                    />
                     <div className="p-3 md:p-4 group-hover:bg-gray-100 transition">
                       <h3 className="text-sm md:text-lg font-semibold mb-2 !line-clamp-1">{product.name || "Product Name"}</h3>
                       <p className="text-sm text-gray-600 mb-2 hidden md:block !line-clamp-3">
@@ -212,15 +198,11 @@ const Page = ({ params }) => {
               </div>
             ))}
           </div>
-
-          {/* Supplier Section */}
-          {/* <PartSupplier suppliers={suppliers} /> */}
-
         </div>
       </div>
+
       <div className="w-10/12 mx-auto my-8">
         <AboutPart mySubPart={subCategory} />
-
       </div>
     </>
   );

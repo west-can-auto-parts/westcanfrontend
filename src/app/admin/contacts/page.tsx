@@ -33,6 +33,8 @@ const AdminContactsPage = () => {
     ? "https://adminbackend-r86i.onrender.com/admin/api"
     : "http://localhost:8081/admin/api";
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -41,8 +43,9 @@ const AdminContactsPage = () => {
     setLoading(true);
     setError(null);
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const endpoint = activeTab === "contacts" ? "contact" : "subscribe";
-      const response = await axios.get(`${apiUrl}/${endpoint}`);
+      const response = await axios.get(`${apiUrl}/${endpoint}`,{headers});
       setData(response.data);
     } catch (err) {
       setError(`Failed to fetch ${activeTab}.`);
@@ -66,9 +69,11 @@ const AdminContactsPage = () => {
 
   const handleDownloadExcel = async () => {
     try {
+      const headers = { Authorization: `Bearer ${token}` };
       const endpoint = activeTab === "contacts" ? "download-contacts" : "download-subscribers";
       const response = await axios.get(`${apiUrl}/${endpoint}`, {
         responseType: "blob", // Ensure the response is treated as a file
+        headers
       });
 
       // Create a URL for the blob and trigger a download

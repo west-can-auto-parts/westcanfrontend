@@ -3,17 +3,23 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { headers } from 'next/headers';
 
 const BlogPostsList = () => {
     const router = useRouter()
     const [posts, setPosts] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
-    const apiUrl = 'http://localhost:8081/api/blog';
+    const isProduction = process.env.NODE_ENV === "production";
+    const apiUrl = isProduction
+    ? "https://adminbackend-r86i.onrender.com/admin/api"
+    : "http://localhost:8081/api/blog";
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await axios.get(apiUrl); // Adjust the endpoint if needed
+                const headers = { Authorization: `Bearer ${token}` };
+                const response = await axios.get(apiUrl,headers); // Adjust the endpoint if needed
                 setPosts(response.data); // Adjust the data structure if needed
                 setLoading(false);
             } catch (err) {
@@ -33,7 +39,8 @@ const BlogPostsList = () => {
 
     const handleDelete = async (postId) => {
         try {
-            await axios.delete(`/api/blogs/${postId}`); // Adjust the endpoint if needed
+            const headers = { Authorization: `Bearer ${token}` };
+            await axios.delete(`/api/blogs/${postId}`,headers); // Adjust the endpoint if needed
             setPosts(posts.filter(post => post._id !== postId)); // Remove post from state
             setError('');
         } catch (err) {

@@ -14,7 +14,7 @@ const Page = ({ params }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [supplier, setSupplier] = useState(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [dynamicLineCount, setDynamicLineCount] = useState(3);
+  const [dynamicLineCount, setDynamicLineCount] = useState(20);
   const [isMobileView, setIsMobileView] = useState(false);
 
   const router = useRouter();
@@ -126,13 +126,13 @@ const Page = ({ params }) => {
     fetchSupplierData();
   }, [brand]);
 
-  useEffect(() => {
-    if (supplierData && selectedCategory) {
-      const productCount = supplierData[selectedCategory]?.length || 0;
-      const calculatedLines = Math.min(3 + Math.floor(productCount / 5), 10);
-      setDynamicLineCount(calculatedLines);
-    }
-  }, [supplierData, selectedCategory]);
+  // useEffect(() => {
+  //   if (supplierData && selectedCategory) {
+  //     const productCount = supplierData[selectedCategory]?.length || 0;
+  //     const calculatedLines = Math.min(3 + Math.floor(productCount / 5), 10);
+  //     setDynamicLineCount(calculatedLines);
+  //   }
+  // }, [supplierData, selectedCategory]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -155,6 +155,9 @@ const Page = ({ params }) => {
 
     const slug = stringToSlug(listing);
     router.push(`/${categorySlug}/${slug}`);
+  };
+  const getShortDescription = (text) => {
+    return isDescriptionExpanded ? text : text.split(" ").slice(0, 60).join(" ") + "...";
   };
 
   const MobileView = () => (
@@ -181,13 +184,8 @@ const Page = ({ params }) => {
           />
         </div>
         <div style={supplierDescriptionStyles.container}>
-          <p className={isDescriptionExpanded ? "line-clamp-none" : `line-clamp-${dynamicLineCount}`}>
-            {supplier?.description || "No description available."}
-          </p>
-          <button
-            style={supplierDescriptionStyles.toggleButton}
-            onClick={toggleDescription}
-          >
+          <p>{getShortDescription(supplier?.description || "No description available.")}</p>
+          <button style={supplierDescriptionStyles.toggleButton} onClick={toggleDescription}>
             {isDescriptionExpanded ? "View Less" : "View More"}
           </button>
         </div>
@@ -245,7 +243,7 @@ const Page = ({ params }) => {
       <div className="flex flex-col-reverse md:flex-row flex-wrap md:flex-nowrap w-10/12 mx-auto gap-8">
         {/* Sidebar */}
         <div className="mt-[-130px] bg-white p-4 md:p-12 w-full md:w-1/3 shadow-md">
-          <div className="w-full h-[130px] md:h-[130px] flex items-center justify-center border border-gray-300 bg-gray-100">
+          <div className="w-full h-[130px] md:h-[130px] flex items-center justify-center">
             <img
               className="object-contain max-w-full max-h-full"
               src={supplier.logoUrl || ""}
@@ -254,9 +252,7 @@ const Page = ({ params }) => {
           </div>
           <div className="mt-4">
             <div style={supplierDescriptionStyles.container}>
-              <p className={isDescriptionExpanded ? "line-clamp-none" : `line-clamp-${dynamicLineCount}`}>
-                {supplier?.description || "No description available."}
-              </p>
+              <p>{getShortDescription(supplier?.description || "No description available.")}</p>
               <button style={supplierDescriptionStyles.toggleButton} onClick={toggleDescription}>
                 {isDescriptionExpanded ? "View Less" : "View More"}
               </button>

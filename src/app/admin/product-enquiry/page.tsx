@@ -27,12 +27,14 @@ const AdminEnquiriesPage = () => {
     const apiUrl = isProduction
         ? "https://adminbackend-r86i.onrender.com/admin/api"
         : "http://localhost:8081/admin/api";
+    const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
 
     useEffect(() => {
         const fetchEnquiries = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${apiUrl}/product-enquiry-form`);
+                const headers = { Authorization: `Bearer ${token}` };
+                const response = await fetch(`${apiUrl}/product-enquiry-form`,{headers});
                 const enquiryRes = await response.json();
                 setEnquiries(enquiryRes);
             } catch (err) {

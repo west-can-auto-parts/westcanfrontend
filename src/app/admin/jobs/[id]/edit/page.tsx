@@ -1,8 +1,8 @@
 // app/jobs/[id]/edit/page.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const EditJobPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
@@ -10,19 +10,24 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
   const [job, setJob] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isProduction = process.env.NODE_ENV === 'production';
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const isProduction = process.env.NODE_ENV === "production";
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
-    : 'http://localhost:8080/api/jobs';
+    ? "https://adminbackend-r86i.onrender.com/admin/api"
+    : "http://localhost:8081/admin/api";
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
+
   useEffect(() => {
     async function fetchJob() {
       if (id) {
         try {
-          const response = await fetch(`${apiUrl}/${id}`);
-          if (!response.ok) throw new Error('Failed to fetch job');
+          const headers = { Authorization: `Bearer ${token}` };
+          const response = await fetch(`${apiUrl}/jobs/${id}`, { headers });
+          if (!response.ok) throw new Error("Failed to fetch job");
           const data = await response.json();
           setJob(data);
-        } catch (error:any) {
+        } catch (error: any) {
           setError(error.message);
         } finally {
           setLoading(false);
@@ -33,20 +38,35 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
     fetchJob();
   }, [id]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     setJob({ ...job, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
     try {
-      await fetch(`${apiUrl}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`${apiUrl}/jobs/edit/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(job),
       });
-      router.push(`/jobs/${id}`);
+
+      if (!response.ok) throw new Error("Failed to update job");
+
+      setSuccessMessage("Job updated successfully!");
+
+      setTimeout(() => {
+        setSuccessMessage(null);
+         // Redirect to job details page after update
+      }, 2000);
     } catch (error) {
-      console.error('Error updating job:', error);
+      console.error("Error updating job:", error);
     }
   };
 
@@ -54,7 +74,12 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
-    <div className=" bg-white">
+    <div className="bg-white p-6 rounded-md shadow-md">
+      {successMessage && (
+        <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
+          {successMessage}
+        </div>
+      )}
       {job && (
         <div>
           <h1 className="text-2xl font-bold mb-6">Edit Job</h1>
@@ -65,7 +90,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <input
                 type="text"
                 name="jobTitle"
-                value={job.jobTitle || ''}
+                value={job.jobTitle || ""}
                 onChange={handleChange}
                 placeholder="Job Title"
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
@@ -76,7 +101,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <input
                 type="text"
                 name="location"
-                value={job.location || ''}
+                value={job.location || ""}
                 onChange={handleChange}
                 placeholder="Location"
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
@@ -87,7 +112,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <input
                 type="text"
                 name="company"
-                value={job.company || ''}
+                value={job.company || ""}
                 onChange={handleChange}
                 placeholder="Company"
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
@@ -97,29 +122,9 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <label className="block text-sm font-medium text-gray-700">Job Description</label>
               <textarea
                 name="jobDescription"
-                value={job.jobDescription || ''}
+                value={job.jobDescription || ""}
                 onChange={handleChange}
                 placeholder="Job Description"
-                className="mt-1 p-2 border border-gray-300 rounded w-full h-40"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Responsibilities</label>
-              <textarea
-                name="responsibilities"
-                value={job.responsibilities || ''}
-                onChange={handleChange}
-                placeholder="Responsibilities"
-                className="mt-1 p-2 border border-gray-300 rounded w-full h-40"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Qualifications</label>
-              <textarea
-                name="qualifications"
-                value={job.qualifications || ''}
-                onChange={handleChange}
-                placeholder="Qualifications"
                 className="mt-1 p-2 border border-gray-300 rounded w-full h-40"
               />
             </div>
@@ -127,7 +132,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <label className="block text-sm font-medium text-gray-700">Employment Type</label>
               <select
                 name="employmentType"
-                value={job.employmentType || ''}
+                value={job.employmentType || ""}
                 onChange={handleChange}
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
               >
@@ -143,7 +148,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <input
                 type="text"
                 name="salaryRange"
-                value={job.salaryRange || ''}
+                value={job.salaryRange || ""}
                 onChange={handleChange}
                 placeholder="Salary Range"
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
@@ -154,7 +159,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               <input
                 type="date"
                 name="applicationDeadline"
-                value={job.applicationDeadline || ''}
+                value={job.applicationDeadline || ""}
                 onChange={handleChange}
                 className="mt-1 p-2 border border-gray-300 rounded w-full"
               />
@@ -172,7 +177,7 @@ const EditJobPage = ({ params }: { params: { id: string } }) => {
               </label>
             </div>
           </div>
-          
+
           <button
             onClick={handleSave}
             className="mt-6 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

@@ -16,11 +16,12 @@ const AdminCategoriesPage = () => {
   const apiUrl = isProduction
     ? 'https://adminbackend-r86i.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
-
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   useEffect(() => {
     async function fetchCategories() {
       try {
-        const response = await fetch(`${apiUrl}/category`);
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/category`,{headers});
         if (!response.ok) throw new Error('Failed to fetch categories');
         const data = await response.json();
         setCategories(data);
@@ -37,7 +38,8 @@ const AdminCategoriesPage = () => {
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this category?')) {
       try {
-        await fetch(`${apiUrl}/category/delete/${id}`, { method: 'DELETE' });
+        const headers = { Authorization: `Bearer ${token}` };
+        await fetch(`${apiUrl}/category/delete/${id}`, {headers, method: 'DELETE' });
         setCategories(categories.filter(cat => cat.id !== id));
       } catch (error) {
         console.error('Error deleting category:', error);

@@ -24,7 +24,7 @@ const CreateCategoryPage = () => {
     : 'http://localhost:8081/admin/api';
 
 
-
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const handleCreate = async () => {
     if (!name) {
       setError('Category name is required.');
@@ -34,7 +34,7 @@ const CreateCategoryPage = () => {
     try {
       await fetch(`${apiUrl}/category/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           name,
           description,

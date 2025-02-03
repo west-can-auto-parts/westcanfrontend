@@ -12,13 +12,15 @@ const JobDetailPage = ({ params }: { params: { id: string } }) => {
   const [error, setError] = useState<string | null>(null);
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
-    : 'http://localhost:8080/api/jobs';
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
   useEffect(() => {
     async function fetchJob() {
       if (id) {
         try {
-          const response = await fetch(`${apiUrl}/${id}`);
+          const headers = {Authorization: `Bearer ${token}` };
+          const response = await fetch(`${apiUrl}/jobs/${id}`,{headers});
           if (!response.ok) throw new Error('Failed to fetch job');
           const data = await response.json();
           if (Object.keys(data).length === 0) throw new Error('Job not found');
@@ -37,10 +39,10 @@ const JobDetailPage = ({ params }: { params: { id: string } }) => {
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this job?')) {
       try {
-        await fetch(`${apiUrl}/${id}`, {
-          method: 'DELETE',
+        await fetch(`${apiUrl}/jobs/delete/${id}`, {
+          method: 'DELETE',headers:{Authorization: `Bearer ${token}`}
         });
-        router.push('/jobs');
+        router.push('/admin/jobs');
       } catch (error) {
         console.error('Error deleting job:', error);
       }

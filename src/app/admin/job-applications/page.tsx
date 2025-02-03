@@ -16,12 +16,20 @@ const AdminJobApplicationsPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
+  const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
+
   useEffect(() => {
     const fetchApplications = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('/api/applications');
-        setApplications(response.data.jobApplications);
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/job-application/all`, { headers });
+        const data = await response.json();
+        setApplications(data);
       } catch (err) {
         setError('Failed to fetch job applications.');
       } finally {
@@ -56,8 +64,13 @@ const AdminJobApplicationsPage = () => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this job application?')) {
       try {
-        await axios.delete(`/api/job-applications/${id}`);
-        setApplications(applications.filter(app => app.id !== id));
+        const res = await fetch(`${apiUrl}/job-application/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          setApplications(applications.filter(app => app.id !== id));
+        }
       } catch (err) {
         setError('Failed to delete job application.');
       }

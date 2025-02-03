@@ -32,12 +32,14 @@ const SubCategoriesPage = () => {
     ? 'https://adminbackend-r86i.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   // Fetch subcategories and categories
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const subCategoryRes = await fetch(`${apiUrl}/subcategory`);
-        const categoryRes = await fetch(`${apiUrl}/category`);
+        const headers = { Authorization: `Bearer ${token}` };
+        const subCategoryRes = await fetch(`${apiUrl}/subcategory`,{headers});
+        const categoryRes = await fetch(`${apiUrl}/category`,{headers});
 
         if (!subCategoryRes.ok || !categoryRes.ok) {
           throw new Error('Failed to fetch data');
@@ -60,7 +62,8 @@ const SubCategoriesPage = () => {
 
   // Handle delete subcategory
   const handleDelete = async (id: string) => {
-    const res = await fetch(`${apiUrl}/subcategory/${id}`, { method: 'DELETE' });
+    const headers = { Authorization: `Bearer ${token}` };
+    const res = await fetch(`${apiUrl}/subcategory/${id}`, {headers, method: 'DELETE' });
 
     if (res.ok) {
       setSubCategories(subCategories.filter((subcategory) => subcategory.id !== id));
