@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { headers } from 'next/headers';
 
 const BlogPostsList = () => {
     const router = useRouter()
