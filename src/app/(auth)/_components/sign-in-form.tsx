@@ -118,9 +118,9 @@ export const SignInForm = () => {
                   Password
                 </label>
                 <div className="text-sm">
-                  <a href="#" className="font-semibold text-[#b91b29] hover:text-red-800">
+                  <Link href="/forgot-password" className="font-semibold text-[#b91b29] hover:text-red-800">
                     Forgot password?
-                  </a>
+                  </Link>
                 </div>
               </div>
               <div className="mt-2">

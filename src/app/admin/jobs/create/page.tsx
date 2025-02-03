@@ -20,17 +20,18 @@ const CreateJobPage = () => {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
-    : 'http://localhost:8080/api/jobs';
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
 
   const handleCreate = async () => {
     try {
         const formattedDeadline = applicationDeadline
         ? new Date(applicationDeadline).toISOString()
         : null;
-      await fetch(apiUrl, {
+      await fetch(`${apiUrl}/jobs/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' , Authorization: `Bearer ${token}`},
         body: JSON.stringify({
           jobTitle,
           location,

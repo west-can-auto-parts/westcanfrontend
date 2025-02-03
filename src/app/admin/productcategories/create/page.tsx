@@ -52,6 +52,8 @@ const ProductCategoriesPage = () => {
   const apiUrl = isProduction
     ? 'https://adminbackend-r86i.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
+  
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
   const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
@@ -66,8 +68,9 @@ const ProductCategoriesPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const allCategoryRes = await fetch(`${apiUrl}/category`);
-        const allSubCategoryRes = await fetch(`${apiUrl}/subcategory`)
+        const headers = {Authorization: `Bearer ${token}` };
+        const allCategoryRes = await fetch(`${apiUrl}/category`,{headers});
+        const allSubCategoryRes = await fetch(`${apiUrl}/subcategory`,{headers})
 
         if (!allCategoryRes.ok || !allSubCategoryRes.ok) {
           throw new Error('Failed to fetch data');
@@ -128,7 +131,7 @@ const ProductCategoriesPage = () => {
 
     const res = await fetch(`${apiUrl}/product-category/create`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(formData),
     });
 

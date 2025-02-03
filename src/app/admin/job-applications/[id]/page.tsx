@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useParams } from 'next/navigation';
+import { ok } from 'assert';
 
 const ViewJobApplicationPage = () => {
   const [application, setApplication] = useState<any | null>(null);
@@ -11,14 +12,20 @@ const ViewJobApplicationPage = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const { id } = useParams(); // Assuming you use `useParams` to get the ID from the URL
-
+  const isProduction = process.env.NODE_ENV === 'production';
+  const apiUrl = isProduction
+    ? 'https://adminbackend-r86i.onrender.com/admin/api'
+    : 'http://localhost:8081/admin/api';
+    const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
   useEffect(() => {
     const fetchApplication = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`/api/applications/${id}`);
-        setApplication(response.data.jobApplication);
-        setStatus(response.data.status);
+        const headers = {Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/job-application/${id}`,{headers});
+        const data = await response.json();
+        setApplication(data);
+        // setStatus(ok);
       } catch (err) {
         setError('Failed to fetch job application.');
       } finally {

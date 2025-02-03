@@ -40,13 +40,14 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
   const apiUrl = isProduction
     ? 'https://adminbackend-r86i.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
-
+  const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
   // Fetch the subcategory and categories to edit
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const subCategoryRes = await fetch(`${apiUrl}/subcategory/${id}`);
-        const categoryRes = await fetch(`${apiUrl}/category`);
+        const headers = {Authorization: `Bearer ${token}` };
+        const subCategoryRes = await fetch(`${apiUrl}/subcategory/${id}`,{headers});
+        const categoryRes = await fetch(`${apiUrl}/category`,{headers});
 
         if (!subCategoryRes.ok || !categoryRes.ok) {
           throw new Error('Failed to fetch data');
@@ -90,7 +91,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
     try {
       const res = await fetch(`/api/subcategories/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData),
       });
 

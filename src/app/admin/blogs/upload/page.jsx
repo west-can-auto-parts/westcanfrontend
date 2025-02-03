@@ -61,6 +61,11 @@ const CreateBlog = () => {
   const [newCategory, setNewCategory] = useState('');
   const [previewUrl, setPreviewUrl] = useState(''); // State for image preview
   const [publicId, setPublicId] = useState('')
+  const isProduction = process.env.NODE_ENV === "production";
+    const apiUrl = isProduction
+    ? "https://adminbackend-r86i.onrender.com/admin/api"
+    : "http://localhost:8081/api/blog";
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -107,12 +112,11 @@ const CreateBlog = () => {
   const removeCategory = (category) => {
     setFormData({ ...formData, categories: formData.categories.filter(c => c !== category) });
   };
-  const apiUrl = 'http://localhost:8081/api/blog';
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log(formData)
-      await axios.post(apiUrl, formData);
+      const headers = { Authorization: `Bearer ${token}` };
+      await axios.post(apiUrl, formData,headers);
       // Reset form after successful submission
       setFormData({
         title: '',

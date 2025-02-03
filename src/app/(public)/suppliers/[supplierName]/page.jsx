@@ -14,7 +14,8 @@ const Page = ({ params }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [supplier, setSupplier] = useState(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [dynamicLineCount, setDynamicLineCount] = useState(3);
+  const [dynamicLineCount, setDynamicLineCount] = useState(20);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const router = useRouter();
 
@@ -22,6 +23,9 @@ const Page = ({ params }) => {
   const apiUrl = isProduction
     ? "https://frontendbackend-wn0p.onrender.com/api/suppliers"
     : "http://localhost:8080/api/suppliers";
+
+  const backgroundImageUrl =
+    "https://res.cloudinary.com/dpeocx0yy/image/upload/v1737539505/BANNER_fwflwx.png";
 
   function stringToSlug(str) {
     str = str.replace("&", "and");
@@ -37,13 +41,69 @@ const Page = ({ params }) => {
     if (!slug || slug.trim() === "") {
       return slug;
     }
-    // Replace hyphens with spaces and convert to uppercase
     return slug.replace("-", " ").toUpperCase();
   };
+
   const brand = slugToOriginalName(params.supplierName);
 
+  const customSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      borderColor: "#b12b29", // Red border
+      "&:hover": {
+        borderColor: "#b12b29",
+      },
+      boxShadow: state.isFocused ? "0 0 0 1px #b12b29" : "none",
+    }),
+    dropdownIndicator: (base) => ({
+      ...base,
+      padding: "4px",
+      color: "#b12b29",
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      padding: "4px",
+      color: "#b12b29",
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      padding: "2px 6px",
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: "#ffffff", // White background for dropdown menu
+      color: "#000000", // Black text for dropdown menu
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected ? "#b12b29" : "#ffffff", // Red only for selected, white for others
+      color: state.isSelected ? "#ffffff" : "#000000", // White text only for selected
+      "&:hover": {
+        backgroundColor: "#b12b29", // Red background on hover
+        color: "#ffffff", // White text on hover
+      },
+    }),
+  };
+
+
+  const supplierDescriptionStyles = {
+    container: {
+      backgroundColor: "#b12b29", // Light red background
+      color: "#ffffff", // White text
+      padding: "16px", // Add padding for a clean layout
+      lineHeight: "1.5", // Improve readability with proper line height
+    },
+    toggleButton: {
+      color: "#ffffff", // White button text
+      fontWeight: "bold",
+      textDecoration: "underline",
+      marginTop: "8px", // Space between the description and button
+    },
+  };
+
+
+
   useEffect(() => {
-    // Find the supplier data based on the brand
     const foundSupplier = suppliers.find((s) => s.brand === brand);
     setSupplier(foundSupplier);
   }, [searchParams, brand]);
@@ -66,34 +126,26 @@ const Page = ({ params }) => {
     fetchSupplierData();
   }, [brand]);
 
-  // Always calculate dynamic lines after supplier data is updated
+  // useEffect(() => {
+  //   if (supplierData && selectedCategory) {
+  //     const productCount = supplierData[selectedCategory]?.length || 0;
+  //     const calculatedLines = Math.min(3 + Math.floor(productCount / 5), 10);
+  //     setDynamicLineCount(calculatedLines);
+  //   }
+  // }, [supplierData, selectedCategory]);
+
   useEffect(() => {
-    if (supplierData && selectedCategory) {
-      const productCount = supplierData[selectedCategory]?.length || 0;
-      const calculatedLines = Math.min(3 + Math.floor(productCount / 5), 10); // Adjust the formula as needed
-      setDynamicLineCount(calculatedLines);
-    }
-  }, [supplierData, selectedCategory]);
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768); // Adjust breakpoint for mobile
+    };
+    handleResize(); // Initial check
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const toggleDescription = () => {
     setIsDescriptionExpanded(!isDescriptionExpanded);
   };
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!supplierData) {
-    return <p>Supplier not found.</p>;
-  }
-
-  const categories = Object.keys(supplierData);
-
-  // Format categories for react-select
-  const categoryOptions = categories.map(category => ({
-    value: category,
-    label: category
-  }));
 
   const handleClick = (listing, category) => {
     const categorySlug =
@@ -101,13 +153,82 @@ const Page = ({ params }) => {
         ? "replacement-parts"
         : "shop-supplies";
 
-    const slug = stringToSlug(listing); // Convert listing to a slug
+    const slug = stringToSlug(listing);
     router.push(`/${categorySlug}/${slug}`);
   };
+  const getShortDescription = (text) => {
+    return isDescriptionExpanded ? text : text.split(" ").slice(0, 60).join(" ") + "...";
+  };
 
-  console.log('supplier: ',supplier)
+  const MobileView = () => (
+    <div className="flex flex-col w-full gap-4">
+      {/* Mobile Header */}
+      <div
+        className="h-40 relative"
+        style={{
+          backgroundImage: `url(${backgroundImageUrl})`,
+          backgroundSize: "contain", // Ensure the entire image is visible
+          backgroundRepeat: "no-repeat", // Avoid repeating the image
+          backgroundPosition: "center", // Center the image
+        }}
+      >
+        <div className="overlay bg-[#00000080] h-full w-full absolute top-0 left-0"></div>
+      </div>
+      {/* Mobile Sidebar */}
+      <div className="bg-white p-4 shadow-md">
+        <div className="w-full h-[100px] flex items-center justify-center border border-gray-300 bg-gray-100">
+          <img
+            src={supplier?.logoUrl || ""}
+            alt={brand || "Supplier logo"}
+            className="object-contain max-w-full max-h-full"
+          />
+        </div>
+        <div style={supplierDescriptionStyles.container}>
+          <p>{getShortDescription(supplier?.description || "No description available.")}</p>
+          <button style={supplierDescriptionStyles.toggleButton} onClick={toggleDescription}>
+            {isDescriptionExpanded ? "View Less" : "View More"}
+          </button>
+        </div>
 
-  return (
+      </div>
+      {/* Mobile Products */}
+      <div>
+        <div className="mb-4">
+          <Select
+            id="category-select"
+            className="basic-single"
+            classNamePrefix="select"
+            value={{ value: selectedCategory, label: selectedCategory }}
+            onChange={(e) => setSelectedCategory(e.value)}
+            options={Object.keys(supplierData).map((category) => ({
+              value: category,
+              label: category,
+            }))}
+            styles={customSelectStyles}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {supplierData[selectedCategory]?.map((product, i) => (
+            <div
+              key={i}
+              className="bg-white p-4 shadow-sm"
+              onClick={() => handleClick(product.name, product.categoryName)}
+            >
+              <img
+                src={product.imageUrl[0]}
+                alt={product.name}
+                className="w-full h-40 object-contain"
+              />
+              <h3 className="text-sm font-semibold">{product.name}</h3>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+
+  const DesktopView = () => (
     <>
       <div
         className="w-full bg-no-repeat bg-center"
@@ -119,103 +240,109 @@ const Page = ({ params }) => {
       >
         <div className="overlay bg-[#00000080] h-full w-full"></div>
       </div>
-
       <div className="flex flex-col-reverse md:flex-row flex-wrap md:flex-nowrap w-10/12 mx-auto gap-8">
-        {/* Sidebar Section */}
-        <div className="mt-[-100px] bg-white p-4 md:p-12 w-full md:w-1/3 shadow-md">
-          {/* Logo Section */}
-          <div className="w-full h-[100px] md:h-[100px] flex items-center justify-center border border-gray-300 bg-gray-100">
+        {/* Sidebar */}
+        <div className="mt-[-130px] bg-white p-4 md:p-12 w-full md:w-1/3 shadow-md">
+          <div className="w-full h-[130px] md:h-[130px] flex items-center justify-center">
             <img
               className="object-contain max-w-full max-h-full"
               src={supplier.logoUrl || ""}
               alt={brand || "Supplier logo"}
             />
           </div>
-
-          {/* Description Section */}
           <div className="mt-4">
-            <p
-              className={`text-sm text-gray-600 overflow-hidden transition-all ${isDescriptionExpanded ? "line-clamp-none" : `line-clamp-${dynamicLineCount}`
-                }`}
-            >
-              {supplier.description || "No description available."}
-            </p>
-            {supplier.description &&
-              supplier.description.length > 100 && ( // Show button only for long descriptions
-                <button
-                  className="mt-2 text-[#b12b29] font-semibold text-sm underline"
-                  onClick={toggleDescription}
-                >
-                  {isDescriptionExpanded ? "View Less" : "View More"}
-                </button>
-              )}
+            <div style={supplierDescriptionStyles.container}>
+              <p>{getShortDescription(supplier?.description || "No description available.")}</p>
+              <button style={supplierDescriptionStyles.toggleButton} onClick={toggleDescription}>
+                {isDescriptionExpanded ? "View Less" : "View More"}
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Main Content Section */}
-        <div className="w-full md:w-4/5 py-2 md:py-8">
-          {/* Category Dropdown */}
-          <div className="mb-4">
-            
+        {/* Products */}
+        <div className="w-2/3">
+          <div className="mt-6"> {/* Add margin-top for spacing */}
             <Select
-              id="category-select"
-              className="basic-single"
-              classNamePrefix="select"
-              value={categoryOptions.find((option) => option.value === selectedCategory)}
-              onChange={(e) => setSelectedCategory(e.value)} // Use e.value to get the selected category
-              options={categoryOptions} // Pass the category options here
+              value={{ value: selectedCategory, label: selectedCategory }}
+              onChange={(e) => setSelectedCategory(e.value)}
+              options={Object.keys(supplierData).map((category) => ({
+                value: category,
+                label: category,
+              }))}
               styles={{
-                control: (base) => ({
+                control: (base, state) => ({
                   ...base,
-                  minHeight: '20px', // Adjust height
-                  width: '380px', // Adjust width
-                  fontSize: '16px', // Adjust font size
+                  minHeight: "40px", // Adjust height
+                  width: "380px", // Adjust width
+                  fontSize: "16px", // Adjust font size
+                  borderColor: state.isFocused ? "#b12b29" : "#b12b29", // Red border
+                  "&:hover": {
+                    borderColor: "#b12b29",
+                  },
+                  boxShadow: state.isFocused ? "0 0 0 1px #b12b29" : "none",
                 }),
                 dropdownIndicator: (base) => ({
                   ...base,
-                  padding: '4px', // Adjust padding for the dropdown icon
+                  padding: "4px",
                 }),
                 clearIndicator: (base) => ({
                   ...base,
-                  padding: '4px', // Adjust padding for the clear icon
+                  padding: "4px",
                 }),
                 valueContainer: (base) => ({
                   ...base,
-                  padding: '2px 6px', // Adjust padding for the text inside
+                  padding: "2px 6px",
                 }),
-                // menu: (base) => ({
-                //   ...base,
-                //   width: '380px',
-                //   fontSize: '16px', // Adjust font size in the dropdown options
-                // }),
+                menu: (base) => ({
+                  ...base,
+                  width: "380px",
+                  fontSize: "16px",
+                  backgroundColor: "#b12b29",
+                  color: "#ffffff",
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected
+                    ? "#ffffff"
+                    : state.isFocused
+                      ? "#b12b29"
+                      : "#ffffff",
+                  color: state.isSelected ? "#b12b29" : "#000000",
+                  "&:hover": {
+                    color: "#ffffff",
+                  },
+                }),
               }}
             />
           </div>
-
-          {/* Products for Selected Category */}
-          <div className="grid grid-cols-2 md:grid-cols-4">
+          <div className="grid grid-cols-4 gap-4 mt-6"> {/* Add margin-top for spacing */}
             {supplierData[selectedCategory]?.map((product, i) => (
               <div
                 key={i}
-                className="bg-white p-4 hover:shadow-md hover:scale-105 transition border border-gray-100 cursor-pointer"
-                onClick={() =>
-                  handleClick(product.name, product.categoryName, product.subCategoryName)
-                }
+                className="bg-white p-4 shadow-sm"
+                onClick={() => handleClick(product.name, product.categoryName)}
               >
                 <img
                   src={product.imageUrl[0]}
                   alt={product.name}
                   className="w-full h-40 object-contain"
                 />
-                <h3 className="font-semibold mb-2 text-center text-sm">{product.name}</h3>
-                <p className="text-gray-500 text-center text-xs">View Products</p>
+                <h3 className="text-sm font-semibold">{product.name}</h3>
               </div>
             ))}
           </div>
         </div>
       </div>
+
     </>
   );
+
+
+
+  if (isLoading) return <p>Loading...</p>;
+  if (!supplierData) return <p>Supplier not found.</p>;
+
+  return isMobileView ? <MobileView /> : <DesktopView />;
 };
 
 export default Page;

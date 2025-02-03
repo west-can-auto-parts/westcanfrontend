@@ -13,7 +13,7 @@ const Navigation = () => {
     { icon: FaRegPenToSquare,label:'Product-Enquiry',href:'/admin/product-enquiry'},
     { icon: FaUserCog, label: 'Contacts', href: '/admin/contacts' },
     { icon: GiFountainPen, label: "Blogs", href: '/admin/blogs' },
-    { icon: FaWrench, label: " Products", href: '/admin/products' },
+    // { icon: FaWrench, label: " Products", href: '/admin/products' },
     { icon: FaBars, label:  "Categories", href: '/admin/categories' },
     { icon: FaBars, label:  "Sub-Categories", href: '/admin/subcategories' },
     { icon: FaBars, label:  "Product-Categories", href: '/admin/productcategories' },
