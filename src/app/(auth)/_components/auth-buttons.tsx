@@ -12,7 +12,7 @@ export function GoogleSignInButton() {
     // Redirect to the backend OAuth2 login endpoint
     const isProduction = process.env.NODE_ENV === 'production';
     const apiUrl = isProduction
-      ? 'https://frontendbackend-wn0p.onrender.com'
+      ? 'https://westcanuserbackend.onrender.com'
       : 'http://localhost:8080';
     const backendOAuthUrl =`${apiUrl}/oauth2/authorization/google`;
     window.location.href = backendOAuthUrl; // Use window.location for full page redirect

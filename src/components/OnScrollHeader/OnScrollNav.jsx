@@ -16,7 +16,7 @@ const OnScrollNav = () => {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-      ? 'https://frontendbackend-wn0p.onrender.com/api'
+      ? 'https://westcanuserbackend.onrender.com/api'
       : 'http://localhost:8080/api';
 
 

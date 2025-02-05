@@ -11,7 +11,7 @@ const BlogPost = ({ params }) => {
   const [loading, setLoading] = useState(true);
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/blog'
+    ? 'https://westcanuserbackend.onrender.com/api/blog'
     : 'http://localhost:8080/api/blog';
   useEffect(() => {
     const fetchBlog = async () => {

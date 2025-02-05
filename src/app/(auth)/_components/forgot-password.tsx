@@ -11,7 +11,7 @@ export default function ForgotPassword() {
 
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com'
+    ? 'https://westcanuserbackend.onrender.com'
     : 'http://localhost:8080';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
