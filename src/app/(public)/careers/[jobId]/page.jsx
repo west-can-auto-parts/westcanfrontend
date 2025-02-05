@@ -24,7 +24,7 @@ const JobApplicationForm = ({ params }) => {
     const [previewUrl, setPreviewUrl] = useState('')
     const isProduction = process.env.NODE_ENV === 'production';
     const apiUrl = isProduction
-        ? 'https://frontendbackend-wn0p.onrender.com/api/jobs'
+        ? 'https://westcanuserbackend.onrender.com/api/jobs'
         : 'http://localhost:8080/api/jobs';
     useEffect(() => {
         // Fetch job details based on jobId

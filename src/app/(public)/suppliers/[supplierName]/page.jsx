@@ -21,7 +21,7 @@ const Page = ({ params }) => {
 
   const isProduction = process.env.NODE_ENV === "production";
   const apiUrl = isProduction
-    ? "https://frontendbackend-wn0p.onrender.com/api/suppliers"
+    ? "https://westcanuserbackend.onrender.com/api/suppliers"
     : "http://localhost:8080/api/suppliers";
 
   const backgroundImageUrl =

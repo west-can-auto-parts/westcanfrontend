@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const apiUrl = isProduction
-    ? 'https://frontendbackend-wn0p.onrender.com/api/product'
+    ? 'https://westcanuserbackend.onrender.com/api/product'
     : 'http://localhost:8080/api/product';
 // const fetchCategories = async () => {
 //     const response = await fetch('/api/product-categories');

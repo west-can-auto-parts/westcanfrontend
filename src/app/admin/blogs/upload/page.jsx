@@ -63,7 +63,7 @@ const CreateBlog = () => {
   const [publicId, setPublicId] = useState('')
   const isProduction = process.env.NODE_ENV === "production";
     const apiUrl = isProduction
-    ? "https://adminbackend-r86i.onrender.com/admin/api"
+    ? "https://westcanadmin.onrender.com/admin/api"
     : "http://localhost:8081/api/blog";
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const handleChange = (e) => {
