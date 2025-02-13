@@ -24,7 +24,16 @@ const fetchProducts = async () => {
     const data = await response.json();
     return data;
 };
-
+function stringToSlug(str) {
+    str = str.replace("&", "and");
+  
+    return str
+      .toLowerCase()          
+      .trim()                 
+      .replace(/[^a-z0-9 -]/g, "")  
+      .replace(/\s+/g, "-")         
+      .replace(/--+/g, "-");       
+  }
 const FeaturedProducts = () => {
     const router = useRouter()
     const [autoParts, setAutoParts] = useState([]);
@@ -50,7 +59,8 @@ const FeaturedProducts = () => {
         const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
           ? 'replacement-parts'
           : 'shop-supplies';
-        router.push(`/${categorySlug}/${listing}`);
+          const slug = stringToSlug(listing);
+        router.push(`/${categorySlug}/${slug}`);
       };
 
     return (
