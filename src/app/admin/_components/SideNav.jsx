@@ -17,7 +17,8 @@ const Navigation = () => {
     { icon: FaBars, label:  "Categories", href: '/admin/categories' },
     { icon: FaBars, label:  "Sub-Categories", href: '/admin/subcategories' },
     { icon: FaBars, label:  "Product-Categories", href: '/admin/productcategories' },
-    { icon: FaUser, label:  "Users", href: '/admin/user' }
+    { icon: FaUser, label:  "Users", href: '/admin/user' },
+    { icon: FaUser, label:  "AdminProfile", href: '/admin/admin-profile' }
   ];
   return (
     <nav className="w-full p-6 bg-gray-100 h-full shadow-md">

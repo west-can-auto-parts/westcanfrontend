@@ -14,6 +14,8 @@ interface ProductCategory {
   tags: string[];
   featured: boolean;
   bestSeller: boolean;
+  productPosition?: number;
+  supplierPosition?: number;
 }
 
 interface Category {
@@ -26,13 +28,32 @@ interface SubCategory {
   name: string;
 }
 
+interface BrandPosition {
+  brandId: string;
+  position: number;
+}
+
+interface FormData {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string[];
+  categoryId: string;
+  subCategoryId: string;
+  tags: string[];
+  featured: boolean;
+  bestSeller: boolean;
+  productPosition: number | null;
+  brandPositions: BrandPosition[];
+}
+
 const ProductCategoriesPage = () => {
   const [productCategories, setProductCategories] = useState<Category[]>([]);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [allsubCategory, setAllSubCategory] = useState<SubCategory[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [formData, setFormData] = useState<ProductCategory>({
-    id: '', // Assuming ID is managed by the backend and not needed on the form
+  const [formData, setFormData] = useState<FormData>({
+    id: '',
     name: '',
     description: '',
     imageUrl: [],
@@ -41,19 +62,22 @@ const ProductCategoriesPage = () => {
     bestSeller: false,
     categoryId: '',
     subCategoryId: '',
+    productPosition: null,
+    brandPositions: []
   });
   const [imageUrl, setImageUrl] = useState<string>('');
   const [propertyKey, setPropertyKey] = useState<string>('');
   const [propertyValue, setPropertyValue] = useState<string>('');
   const [tag, setTag] = useState<string>('');
+  const [brands, setBrands] = useState<Array<{ id: string, name: string }>>([]);
 
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
     ? 'https://westcanadmin.onrender.com/admin/api'
     : 'http://localhost:8081/admin/api';
-  
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('jwt_token') : null;
 
   const handleImageUpload = (result: any) => {
     const imageUrl = result.info.secure_url;
@@ -63,14 +87,13 @@ const ProductCategoriesPage = () => {
     }));
   };
 
-
   // Fetch categories and all available categories
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {Authorization: `Bearer ${token}` };
-        const allCategoryRes = await fetch(`${apiUrl}/category`,{headers});
-        const allSubCategoryRes = await fetch(`${apiUrl}/subcategory`,{headers})
+        const headers = { Authorization: `Bearer ${token}` };
+        const allCategoryRes = await fetch(`${apiUrl}/category`, { headers });
+        const allSubCategoryRes = await fetch(`${apiUrl}/subcategory`, { headers })
 
         if (!allCategoryRes.ok || !allSubCategoryRes.ok) {
           throw new Error('Failed to fetch data');
@@ -78,7 +101,6 @@ const ProductCategoriesPage = () => {
 
         const allCategoryData = await allCategoryRes.json();
         const allSubCategoryData = await allSubCategoryRes.json();
-
 
         setAllCategories(allCategoryData);
         setAllSubCategory(allSubCategoryData);
@@ -90,6 +112,22 @@ const ProductCategoriesPage = () => {
     };
 
     fetchData();
+  }, []);
+
+  // Fetch brands when component mounts
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/suppliers/all`, { headers });
+        const data = await response.json();
+        setBrands(data);
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+      }
+    };
+
+    fetchBrands();
   }, []);
 
   // Handle form input changes
@@ -112,8 +150,6 @@ const ProductCategoriesPage = () => {
     }
   };
 
-
-
   // Handle tag addition
   const handleAddTag = () => {
     if (tag) {
@@ -126,13 +162,26 @@ const ProductCategoriesPage = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Convert brandPositions array to Map structure
+    const brandAndPosition: { [key: string]: number } = {};
+    formData.brandPositions.forEach(bp => {
+      if (bp.brandId && bp.position) {
+        brandAndPosition[bp.brandId] = bp.position;
+      }
+    });
+
+    const dataToSend = {
+      ...formData,
+      brandAndPosition // This will be sent as a Map to the backend
+    };
 
     const res = await fetch(`${apiUrl}/product-category/create`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify(formData),
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(dataToSend),
     });
 
     if (res.ok) {
@@ -146,6 +195,25 @@ const ProductCategoriesPage = () => {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleAddBrandPosition = () => {
+    setFormData(prev => ({
+      ...prev,
+      brandPositions: [...prev.brandPositions, { brandId: '', position: 0 }]
+    }));
+  };
+
+  const handleBrandPositionChange = (index: number, field: 'brandId' | 'position', value: string | number) => {
+    const newBrandPositions = [...formData.brandPositions];
+    newBrandPositions[index] = {
+      ...newBrandPositions[index],
+      [field]: value
+    };
+    setFormData(prev => ({
+      ...prev,
+      brandPositions: newBrandPositions
+    }));
   };
 
   if (loading) {
@@ -199,7 +267,7 @@ const ProductCategoriesPage = () => {
             onSuccess={handleImageUpload}
           >
             {({ open }) => (
-              <button type="button" onClick={() => open()} className="bg-gray-200 p-2 rounded">
+              <button type="button" onClick={() => open()} className="bg-[#b91b29] p-2 rounded">
                 Upload an Image
               </button>
             )}
@@ -223,7 +291,7 @@ const ProductCategoriesPage = () => {
               overflow: "hidden", // Prevent scrollbars
             }}
           />
-          <button type="button" onClick={handleAddTag} className="bg-blue-500 text-white px-4 py-2 rounded">
+          <button type="button" onClick={handleAddTag} className="bg-[#b91b29] text-white px-4 py-2 rounded">
             Add Tag
           </button>
           <div className="mt-2">
@@ -292,7 +360,80 @@ const ProductCategoriesPage = () => {
             className="mr-2"
           />
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+        <div className="mb-4 grid grid-cols-2 gap-4">
+          <div>
+            <label className="block">
+              Product Position
+            </label>
+            <input
+              type="number"
+              name="productPosition"
+              value={formData.productPosition || ''}
+              onChange={(e) => setFormData({ ...formData, productPosition: parseInt(e.target.value) })}
+              min="1"
+              className="mr-2 border p-2 rounded w-full"
+              required
+              style={{
+                width: "500px", // Set dynamic height based on content
+                resize: "none", // Disable manual resizing
+                overflow: "hidden", // Prevent scrollbars
+              }}
+            />
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Brand Positions
+          </label>
+          {formData.brandPositions.map((bp, index) => (
+            <div key={index} className="flex gap-4 mb-2">
+              <select
+                value={bp.brandId}
+                onChange={(e) => handleBrandPositionChange(index, 'brandId', e.target.value)}
+                className="block w-full rounded-md border-2 py-1.5 text-gray-900 shadow-sm ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-800 sm:text-sm sm:leading-6"
+                required
+              style={{
+                width: "500px", // Set dynamic height based on content
+                resize: "none", // Disable manual resizing
+                overflow: "hidden", // Prevent scrollbars
+              }}
+              >
+                <option value="">Select Brand</option>
+                {brands.map(brand => (
+                  <option key={brand.id} value={brand.id}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={bp.position}
+                onChange={(e) => handleBrandPositionChange(index, 'position', parseInt(e.target.value))}
+                min="1"
+                placeholder="Position"
+                className="block w-32 rounded-md border-2 py-1.5 text-gray-900 shadow-sm ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-800 sm:text-sm sm:leading-6"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const newBrandPositions = formData.brandPositions.filter((_, i) => i !== index);
+                  setFormData(prev => ({ ...prev, brandPositions: newBrandPositions }));
+                }}
+                className="flex justify-center rounded-md bg-[#b91b29] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleAddBrandPosition}
+            className="flex justify-center rounded-md bg-[#b91b29] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
+          >
+            Add Brand Position
+          </button>
+        </div>
+        <button type="submit" className="bg-[#b91b29] text-white px-4 py-2 rounded">
           Add Product Category
         </button>
       </form>

@@ -66,10 +66,18 @@ const Page = ({ params }) => {
         const subCategoryData = JSON.parse(subCategoryText);
         const allSubCategoryData = JSON.parse(allSubCategoryText);
 
-        setMyProduct(productData);
+        // Sort products by productPosition
+        const sortedProducts = productData.sort((a, b) => {
+          // Handle null or undefined productPosition
+          const posA = a.productPosition === null ? Infinity : a.productPosition;
+          const posB = b.productPosition === null ? Infinity : b.productPosition;
+          return posA - posB;
+        });
+
+        setMyProduct(sortedProducts);
         setSubCategory(subCategoryData);
         setAllSubCategory(allSubCategoryData);
-        determineCategory(productData[0]);
+        determineCategory(sortedProducts[0]);
 
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -81,36 +89,6 @@ const Page = ({ params }) => {
 
     fetchData();
   }, [slug]);
-
-  // useEffect(() => {
-  //   if (!currentListing) return;
-
-  //   const fetchSuppliers = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const response = await fetch(`${apiUrl2}/subcategory/search?query=${slug}`);
-
-  //       if (response.status === 204) {
-  //         setSuppliers([]); // Handle no content
-  //         return;
-  //       }
-
-  //       const text = await response.text();
-  //       if (!text) throw new Error("Empty suppliers response");
-
-  //       const data = JSON.parse(text);
-  //       setSuppliers(data);
-
-  //     } catch (err) {
-  //       console.error("Error fetching suppliers:", err);
-  //       setError(err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchSuppliers();
-  // }, [currentListing]);
 
   const handleClick = (listing, category) => {
     const categorySlug =
@@ -184,12 +162,16 @@ const Page = ({ params }) => {
                       className="w-full h-[15vh] md:h-[20vh] object-cover object-center mb-4 rounded"
                     />
                     <div className="p-3 md:p-4 group-hover:bg-gray-100 transition">
-                      <h3 className="text-sm md:text-lg font-semibold mb-2 !line-clamp-1">{product.name || "Product Name"}</h3>
+                      <h3 className="text-sm md:text-lg font-semibold mb-2 !line-clamp-1">
+                        {product.name || "Product Name"}
+                      </h3>
                       <p className="text-sm text-gray-600 mb-2 hidden md:block !line-clamp-3">
                         {product.description || "Product Description"}
                       </p>
                       <div className="flex justify-between items-center">
-                        <button className="text-[#b12b29] py-1 text-sm font-semibold">Explore</button>
+                        <button className="text-[#b12b29] py-1 text-sm font-semibold">
+                          Explore
+                        </button>
                         <FaChevronRight className="h-3 w-3 text-[#b12b29]" />
                       </div>
                     </div>
