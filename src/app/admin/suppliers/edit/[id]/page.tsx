@@ -38,6 +38,10 @@ interface SubCategory {
     subcategoryId: string;
     position: number;
 }
+interface SelectOption {
+    value: string;
+    label: string;
+}
 
 const EditSupplierPage = ({ params }: { params: { id: string } }) => {
     const [formData, setFormData] = useState<FormData>({
