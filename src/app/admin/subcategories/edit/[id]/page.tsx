@@ -4,6 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CldUploadWidget } from 'next-cloudinary';
 
+interface ProdcutCatgoryPosition {
+  brandId: string;
+  position: number;
+}
 interface SubCategory {
   name: string;
   description: string;
@@ -12,6 +16,7 @@ interface SubCategory {
   featured: boolean;
   bestSeller: boolean;
   parentId?: string;
+  productCategoryPositions: ProdcutCatgoryPosition[]
 }
 
 interface Category {
@@ -28,10 +33,12 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
     featured: false,
     bestSeller: false,
     parentId: '',
+    productCategoryPositions: []
   });
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [tag, setTag] = useState<string>('');
+  const [productCategories, setProductCategories] = useState<Array<{ id: string, name: string }>>([]);
 
   const router = useRouter();
   const { id } = params;
@@ -45,9 +52,9 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const headers = {Authorization: `Bearer ${token}` };
-        const subCategoryRes = await fetch(`${apiUrl}/subcategory/${id}`,{headers});
-        const categoryRes = await fetch(`${apiUrl}/category`,{headers});
+        const headers = { Authorization: `Bearer ${token}` };
+        const subCategoryRes = await fetch(`${apiUrl}/subcategory/${id}`, { headers });
+        const categoryRes = await fetch(`${apiUrl}/category`, { headers });
 
         if (!subCategoryRes.ok || !categoryRes.ok) {
           throw new Error('Failed to fetch data');
@@ -67,6 +74,22 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const response = await fetch(`${apiUrl}/product-category`, { headers });
+        const data = await response.json();
+        setProductCategories(data);
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+      }
+    };
+
+    fetchBrands();
+  }, []);
+
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -91,7 +114,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
     try {
       const res = await fetch(`/api/subcategories/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json',Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData),
       });
 
@@ -129,6 +152,28 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
       });
       setTag('');
     }
+  };
+
+  const handleAddProductCategoryPosition = () => {
+    setFormData(prev => ({
+      ...prev,
+      productCategoryPositions: [
+        ...(prev.productCategoryPositions || []), // Ensure it's an array
+        { brandId: '', position: 0 }
+      ]
+    }));
+  };
+
+  const handleProductCategoryPositionChange = (index: number, field: 'brandId' | 'position', value: string | number) => {
+    const newBrandPositions = [...formData.productCategoryPositions];
+    newBrandPositions[index] = {
+      ...newBrandPositions[index],
+      [field]: value
+    };
+    setFormData(prev => ({
+      ...prev,
+      productCategoryPositions: newBrandPositions
+    }));
   };
 
   return (
@@ -176,7 +221,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
             onSuccess={handleImageUpload}
           >
             {({ open }) => (
-              <button type="button" onClick={() => open()} className="bg-gray-200 p-2 rounded">
+              <button type="button" onClick={() => open()} className="bg-[#b91b29] text-white p-2 rounded">
                 Upload an Image
               </button>
             )}
@@ -202,7 +247,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
             }}
             className="border p-2 rounded w-full"
           />
-          <button type="button" onClick={handleAddTag} className="bg-blue-500 text-white px-4 py-2 rounded">
+          <button type="button" onClick={handleAddTag} className="bg-[#b91b29] text-white px-4 py-2 rounded">
             Add Tag
           </button>
           <div className="mt-2">
@@ -252,7 +297,65 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
             className="mr-2"
           />
         </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            ProductCategory Positions
+          </label>
+          {formData.productCategoryPositions && formData.productCategoryPositions.length > 0 ? (
+            formData.productCategoryPositions.map((bp, index) => (
+              <div key={index} className="flex gap-4 mb-2">
+                <select
+                  value={bp.brandId}
+                  onChange={(e) => handleProductCategoryPositionChange(index, 'brandId', e.target.value)}
+                  className="block w-full rounded-md border-2 py-1.5 text-gray-900 shadow-sm ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-800 sm:text-sm sm:leading-6"
+                  required
+                  style={{
+                    width: "500px", // Set dynamic height based on content
+                    resize: "none", // Disable manual resizing
+                    overflow: "hidden", // Prevent scrollbars
+                  }}
+                >
+                  <option value="">Select Brand</option>
+                  {productCategories.map(productCategory => (
+                    <option key={productCategory.id} value={productCategory.id}>
+                      {productCategory.name}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  value={bp.position}
+                  onChange={(e) => handleProductCategoryPositionChange(index, 'position', parseInt(e.target.value))}
+                  min="1"
+                  placeholder="Position"
+                  className="block w-32 rounded-md border-2 py-1.5 text-gray-900 shadow-sm ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-800 sm:text-sm sm:leading-6"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newBrandPositions = formData.productCategoryPositions.filter((_, i) => i !== index);
+                    setFormData(prev => ({ ...prev, productCategoryPositions: newBrandPositions }));
+                  }}
+                  className="flex justify-center rounded-md bg-[#b91b29] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
+                >
+                  Remove
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No product category positions available.</p> // Optional: Message when there are no positions
+          )}
+          <button
+            type="button"
+            onClick={handleAddProductCategoryPosition}
+            className="flex justify-center rounded-md bg-[#b91b29] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-800"
+          >
+            Add ProductCategory Position
+          </button>
+        </div>
+
+        <button type="submit" className="bg-[#b91b29] text-white px-4 py-2 rounded">
           Update SubCategory
         </button>
       </form>

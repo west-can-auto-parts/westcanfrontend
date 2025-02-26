@@ -16,27 +16,38 @@ const OnScrollNav = () => {
   const router = useRouter();
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-      ? 'https://westcanuserbackend.onrender.com/api'
-      : 'http://localhost:8080/api';
+    ? 'https://westcanuserbackend.onrender.com/api'
+    : 'http://localhost:8080/api';
+
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
+  }
 
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-  
+
       // Reset the search bar on scroll
       setSearchQuery("");
       setShowResults(false);
-  
+
       // Update navbar visibility based on scroll direction
       setShowNavbar(currentScrollY > prevScrollY && currentScrollY > 100);
       setPrevScrollY(currentScrollY);
     };
-  
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollY]);
-  
+
 
   const handleSearch = async (query) => {
     if (query.length < 3) {
@@ -44,9 +55,10 @@ const OnScrollNav = () => {
       setShowResults(false);
       return;
     }
+    const slug = stringToSlug(query);
 
     try {
-      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${apiUrl}/search?query=${slug}`);
       if (!response.ok) {
         console.error("Search API returned an error:", response.status);
         setSearchResults(null);
@@ -80,8 +92,8 @@ const OnScrollNav = () => {
       category === "Replacement Parts" || category === "Fluids & Lubricants"
         ? "replacement-parts"
         : "shop-supplies";
-
-    router.push(`/${categorySlug}/${listing}`);
+        const slug = stringToSlug(listing)
+    router.push(`/${categorySlug}/${slug}`);
     setShowResults(false);
   };
 
@@ -111,9 +123,8 @@ const OnScrollNav = () => {
 
   return (
     <nav
-      className={`md:block z-50 fixed top-0 left-0 w-full bg-white border-[1px solid] py-3 transition-transform duration-300 shadow-md ${
-        showNavbar ? "translate-y-0" : "-translate-y-full"
-      }`}
+      className={`md:block z-50 fixed top-0 left-0 w-full bg-white border-[1px solid] py-3 transition-transform duration-300 shadow-md ${showNavbar ? "translate-y-0" : "-translate-y-full"
+        }`}
     >
       <div className="w-11/12 mx-auto flex items-center justify-between gap-4">
         {/* Logo */}

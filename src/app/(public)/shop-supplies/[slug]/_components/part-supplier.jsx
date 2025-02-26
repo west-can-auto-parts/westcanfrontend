@@ -17,19 +17,30 @@ export const PartSupplier = ({ subCategoryName }) => {
 
   // Fetch suppliers by product category from the backend
   useEffect(() => {
-    if (!currentListing) return;
+    if (!subCategoryName || !subCategoryName.brandAndPosition) return;
 
     const fetchSuppliers = async () => {
       setLoading(true);
       setError(null);
       try {
-        const encodedSubCategoryName = encodeURIComponent(subCategoryName);
-        const response = await fetch(`${apiUrl}/search?query=${encodedSubCategoryName}`);
+        const response = await fetch(`${apiUrl}/all`);
         if (!response.ok) {
           throw new Error("Failed to fetch suppliers");
         }
-        const data = await response.json();
-        setSuppliers(data); // Set the suppliers data
+        const allSuppliers = await response.json();
+        console.log("SupplierList: ",allSuppliers);
+
+        // Filter and sort suppliers based on brandAndPosition
+        const brandPositions = subCategoryName.brandAndPosition || {};
+        const filteredAndSortedSuppliers = allSuppliers
+          .filter(supplier => brandPositions[supplier.id] !== undefined)
+          .sort((a, b) => {
+            const positionA = brandPositions[a.id] || 0;
+            const positionB = brandPositions[b.id] || 0;
+            return positionA - positionB;
+          });
+
+        setSuppliers(filteredAndSortedSuppliers);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -38,7 +49,7 @@ export const PartSupplier = ({ subCategoryName }) => {
     };
 
     fetchSuppliers();
-  }, [currentListing]);
+  }, [subCategoryName, apiUrl]);
 
   // Show limited suppliers on mobile, all on desktop
   const suppliersToDisplay =

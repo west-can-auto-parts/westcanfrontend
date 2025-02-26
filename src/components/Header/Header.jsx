@@ -31,11 +31,22 @@ const MainContent = () => {
   const searchBoxRef = useRef(null);
 
   const router = useRouter()
-  
+
   const isProduction = process.env.NODE_ENV === 'production';
   const apiUrl = isProduction
-      ? 'https://westcanuserbackend.onrender.com/api'
-      : 'http://localhost:8080/api';
+    ? 'https://westcanuserbackend.onrender.com/api'
+    : 'http://localhost:8080/api';
+
+  function stringToSlug(str) {
+    str = str.replace("&", "and");
+
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
+  }
 
   const toggleMenu = () => {
     setIsMenuOpen(prev => !prev);
@@ -47,9 +58,9 @@ const MainContent = () => {
       setShowResults(false);
       return;
     }
-
+    const slug = stringToSlug(query);
     try {
-      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${apiUrl}/search?query=${slug}`);
       if (!response.ok) {
         console.error('Search API returned an error:', response.status);
         setSearchResults(null);
@@ -91,9 +102,10 @@ const MainContent = () => {
     if (searchQuery.length < 3) {
       return;
     }
+    const slug = stringToSlug(searchQuery);
 
     try {
-      const response = await fetch(`${apiUrl}/search?query=${encodeURIComponent(searchQuery)}`);
+      const response = await fetch(`${apiUrl}/search?query=${(slug)}`);
       if (!response.ok) {
         console.error('Search API returned an error:', response.status);
         setSearchResults(null);
@@ -112,35 +124,35 @@ const MainContent = () => {
   };
 
 
-  const handleResultClick = (listing,category) => {
+  const handleResultClick = (listing, category) => {
     const categorySlug = category === 'Replacement Parts' || category === 'Fluids & Lubricants'
-    ? 'replacement-parts'
-    : 'shop-supplies';
-
-  // Navigate to the specific product page with category and subcategory
-  router.push(`/${categorySlug}/${listing}`);
+      ? 'replacement-parts'
+      : 'shop-supplies';
+      const slug = stringToSlug(listing)
+    // Navigate to the specific product page with category and subcategory
+    router.push(`/${categorySlug}/${slug}`);
   };
 
   const handleSubCategoryClick = (listing) => {
-  router.push(`/shop/${listing}`);
+    router.push(`/shop/${listing}`);
   };
 
-    useEffect(() => {
-      const handleScroll = () => {
-        const currentScrollY = window.scrollY;
-    
-        // Reset the search bar on scroll
-        setSearchQuery("");
-        setShowResults(false);
-    
-        // Update navbar visibility based on scroll direction
-        setShowNavbar(currentScrollY > prevScrollY && currentScrollY > 100);
-        setPrevScrollY(currentScrollY);
-      };
-    
-      window.addEventListener("scroll", handleScroll);
-      return () => window.removeEventListener("scroll", handleScroll);
-    }, [prevScrollY]);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Reset the search bar on scroll
+      setSearchQuery("");
+      setShowResults(false);
+
+      // Update navbar visibility based on scroll direction
+      setShowNavbar(currentScrollY > prevScrollY && currentScrollY > 100);
+      setPrevScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [prevScrollY]);
 
   useEffect(() => {
     // Add event listener to detect clicks outside
@@ -207,7 +219,7 @@ const MainContent = () => {
                           key={product.id}
                           className='p-2 hover:bg-gray-100 cursor-pointer'
                           onClick={() => {
-                            handleResultClick(product.name,product.categoryName); // Example href generation for ProductCategory
+                            handleResultClick(product.name, product.categoryName); // Example href generation for ProductCategory
                             setShowResults(false);
                           }}
                         >

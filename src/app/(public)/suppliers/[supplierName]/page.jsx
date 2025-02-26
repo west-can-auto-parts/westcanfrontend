@@ -1,21 +1,16 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import suppliers from "@/datas/suppliers";
 import Select from "react-select";
+import axios from "axios";
 
 const Page = ({ params }) => {
-  const searchParams = useSearchParams();
-  const [supplierData, setSupplierData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [supplier, setSupplier] = useState(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const [dynamicLineCount, setDynamicLineCount] = useState(20);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const router = useRouter();
 
@@ -44,9 +39,58 @@ const Page = ({ params }) => {
     return slug.replace("-", " ").toUpperCase();
   };
 
+  const supplierDescriptionStyles = {
+    container: {
+      backgroundColor: "#b12b29", // Light red background
+      color: "#ffffff", // White text
+      padding: "16px", // Add padding for a clean layout
+      lineHeight: "1.5", // Improve readability with proper line height
+    },
+    toggleButton: {
+      color: "#ffffff", // White button text
+      fontWeight: "bold",
+      textDecoration: "underline",
+      marginTop: "8px", // Space between the description and button
+    },
+  };
+
+
   const brand = slugToOriginalName(params.supplierName);
 
   const customSelectStyles = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: "40px",
+      width: "380px",
+      fontSize: "16px",
+      borderColor: state.isFocused ? "#b12b29" : "#b12b29", // Red border
+      "&:hover": {
+        borderColor: "#b12b29",
+      },
+      boxShadow: state.isFocused ? "0 0 0 1px #b12b29" : "none",
+    }),
+    dropdownIndicator: (base) => ({ ...base, padding: "4px", color: "#b12b29" }),
+    clearIndicator: (base) => ({ ...base, padding: "4px", color: "#b12b29" }),
+    valueContainer: (base) => ({ ...base, padding: "2px 6px" }),
+    menu: (base) => ({
+      ...base,
+      width: "380px",
+      fontSize: "16px",
+      backgroundColor: "#ffffff", color: "#000000"
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected
+        ? "#ffffff"
+        : state.isFocused
+          ? "#b12b29"
+          : "#ffffff",
+      color: state.isSelected ? "#b12b29" : "#000000",
+      "&:hover": { backgroundColor: "#b12b29", color: "#ffffff" },
+    }),
+  };
+
+  const customSelectStyles2 = {
     control: (base, state) => ({
       ...base,
       borderColor: "#b12b29", // Red border
@@ -86,36 +130,19 @@ const Page = ({ params }) => {
   };
 
 
-  const supplierDescriptionStyles = {
-    container: {
-      backgroundColor: "#b12b29", // Light red background
-      color: "#ffffff", // White text
-      padding: "16px", // Add padding for a clean layout
-      lineHeight: "1.5", // Improve readability with proper line height
-    },
-    toggleButton: {
-      color: "#ffffff", // White button text
-      fontWeight: "bold",
-      textDecoration: "underline",
-      marginTop: "8px", // Space between the description and button
-    },
-  };
-
-
-
-  useEffect(() => {
-    const foundSupplier = suppliers.find((s) => s.brand === brand);
-    setSupplier(foundSupplier);
-  }, [searchParams, brand]);
-
   useEffect(() => {
     const fetchSupplierData = async () => {
       try {
         const response = await axios.get(`${apiUrl}/name`, {
           params: { names: brand },
         });
-        setSupplierData(response.data);
-        setSelectedCategory(Object.keys(response.data)[0]); // Default to the first category
+        setSupplier(response.data);
+
+        const sortedCategories = Object.entries(response.data.subCategory || {})
+          .sort((a, b) => a[1].position - b[1].position)
+          .map(([key]) => ({ value: key, label: key }));
+
+        setSelectedCategory(sortedCategories[0]?.value || "");
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching supplier data:", error);
@@ -126,19 +153,11 @@ const Page = ({ params }) => {
     fetchSupplierData();
   }, [brand]);
 
-  // useEffect(() => {
-  //   if (supplierData && selectedCategory) {
-  //     const productCount = supplierData[selectedCategory]?.length || 0;
-  //     const calculatedLines = Math.min(3 + Math.floor(productCount / 5), 10);
-  //     setDynamicLineCount(calculatedLines);
-  //   }
-  // }, [supplierData, selectedCategory]);
-
   useEffect(() => {
     const handleResize = () => {
-      setIsMobileView(window.innerWidth < 768); // Adjust breakpoint for mobile
+      setIsMobileView(window.innerWidth < 768);
     };
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -156,6 +175,7 @@ const Page = ({ params }) => {
     const slug = stringToSlug(listing);
     router.push(`/${categorySlug}/${slug}`);
   };
+
   const getShortDescription = (text) => {
     return isDescriptionExpanded ? text : text.split(" ").slice(0, 60).join(" ") + "...";
   };
@@ -178,7 +198,7 @@ const Page = ({ params }) => {
       <div className="bg-white p-4 shadow-md">
         <div className="w-full h-[100px] flex items-center justify-center border border-gray-300 bg-gray-100">
           <img
-            src={supplier?.logoUrl || ""}
+            src={supplier?.imageUrl || ""}
             alt={brand || "Supplier logo"}
             className="object-contain max-w-full max-h-full"
           />
@@ -200,15 +220,16 @@ const Page = ({ params }) => {
             classNamePrefix="select"
             value={{ value: selectedCategory, label: selectedCategory }}
             onChange={(e) => setSelectedCategory(e.value)}
-            options={Object.keys(supplierData).map((category) => ({
-              value: category,
-              label: category,
-            }))}
-            styles={customSelectStyles}
+            options={supplier?.subCategory
+              ? Object.entries(supplier.subCategory)
+                .sort((a, b) => a[1].position - b[1].position)
+                .map(([key]) => ({ value: key, label: key }))
+              : []}
+            styles={customSelectStyles2}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {supplierData[selectedCategory]?.map((product, i) => (
+          {supplier?.subCategory?.[selectedCategory]?.productCategory?.map((product, i) => (
             <div
               key={i}
               className="bg-white p-4 shadow-sm"
@@ -230,23 +251,25 @@ const Page = ({ params }) => {
 
   const DesktopView = () => (
     <>
+      {/* Banner Image */}
       <div
         className="w-full bg-no-repeat bg-center"
         style={{
-          backgroundImage: `url(https://res.cloudinary.com/dpeocx0yy/image/upload/v1737539505/BANNER_fwflwx.png)`,
-          backgroundSize: "contain", // Ensure the full image is visible
-          height: "30vh", // Adjust this as needed
+          backgroundImage: `url(${backgroundImageUrl})`,
+          backgroundSize: "contain",
+          height: "30vh",
         }}
       >
         <div className="overlay bg-[#00000080] h-full w-full"></div>
       </div>
+
       <div className="flex flex-col-reverse md:flex-row flex-wrap md:flex-nowrap w-10/12 mx-auto gap-8">
         {/* Sidebar */}
         <div className="mt-[-130px] bg-white p-4 md:p-12 w-full md:w-1/3 shadow-md">
-          <div className="w-full h-[130px] md:h-[130px] flex items-center justify-center">
+          <div className="w-full h-[130px] flex items-center justify-center">
             <img
               className="object-contain max-w-full max-h-full"
-              src={supplier.logoUrl || ""}
+              src={supplier?.imageUrl || ""}
               alt={brand || "Supplier logo"}
             />
           </div>
@@ -259,90 +282,44 @@ const Page = ({ params }) => {
             </div>
           </div>
         </div>
-        {/* Products */}
+
+        {/* Products Section */}
         <div className="w-2/3">
-          <div className="mt-6"> {/* Add margin-top for spacing */}
+          <div className="mt-6">
             <Select
               value={{ value: selectedCategory, label: selectedCategory }}
               onChange={(e) => setSelectedCategory(e.value)}
-              options={Object.keys(supplierData).map((category) => ({
-                value: category,
-                label: category,
-              }))}
-              styles={{
-                control: (base, state) => ({
-                  ...base,
-                  minHeight: "40px", // Adjust height
-                  width: "380px", // Adjust width
-                  fontSize: "16px", // Adjust font size
-                  borderColor: state.isFocused ? "#b12b29" : "#b12b29", // Red border
-                  "&:hover": {
-                    borderColor: "#b12b29",
-                  },
-                  boxShadow: state.isFocused ? "0 0 0 1px #b12b29" : "none",
-                }),
-                dropdownIndicator: (base) => ({
-                  ...base,
-                  padding: "4px",
-                }),
-                clearIndicator: (base) => ({
-                  ...base,
-                  padding: "4px",
-                }),
-                valueContainer: (base) => ({
-                  ...base,
-                  padding: "2px 6px",
-                }),
-                menu: (base) => ({
-                  ...base,
-                  width: "380px",
-                  fontSize: "16px",
-                  backgroundColor: "#b12b29",
-                  color: "#ffffff",
-                }),
-                option: (base, state) => ({
-                  ...base,
-                  backgroundColor: state.isSelected
-                    ? "#ffffff"
-                    : state.isFocused
-                      ? "#b12b29"
-                      : "#ffffff",
-                  color: state.isSelected ? "#b12b29" : "#000000",
-                  "&:hover": {
-                    color: "#ffffff",
-                  },
-                }),
-              }}
+              options={
+                supplier?.subCategory
+                  ? Object.entries(supplier.subCategory)
+                    .sort((a, b) => a[1].position - b[1].position)
+                    .map(([key]) => ({ value: key, label: key }))
+                  : []
+              }
+              styles={customSelectStyles}
             />
           </div>
-          <div className="grid grid-cols-4 gap-4 mt-6"> {/* Add margin-top for spacing */}
-            {supplierData[selectedCategory]?.map((product, i) => (
-              <div
-                key={i}
-                className="bg-white p-4 shadow-sm"
-                onClick={() => handleClick(product.name, product.categoryName)}
-              >
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            {supplier?.subCategory?.[selectedCategory]?.productCategory?.map((product, i) => (
+              <div key={i} className="bg-white p-4 shadow-sm cursor-pointer" onClick={() => handleClick(product.name, product.categoryName)}>
                 <img
                   src={product.imageUrl[0]}
                   alt={product.name}
-                  className="w-full h-40 object-contain"
+                  className="object-cover w-full h-32"
                 />
-                <h3 className="text-sm font-semibold">{product.name}</h3>
+                <p className="mt-2 text-center font-semibold">{product.name}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
-
     </>
   );
 
-
-
   if (isLoading) return <p>Loading...</p>;
-  if (!supplierData) return <p>Supplier not found.</p>;
+  if (!supplier) return <p>Supplier not found.</p>;
 
   return isMobileView ? <MobileView /> : <DesktopView />;
 };
-
 export default Page;
