@@ -43,7 +43,6 @@ interface FormData {
   tags: string[];
   featured: boolean;
   bestSeller: boolean;
-  productPosition: number | null;
   brandPositions: BrandPosition[];
 }
 
@@ -62,7 +61,6 @@ const ProductCategoriesPage = () => {
     bestSeller: false,
     categoryId: '',
     subCategoryId: '',
-    productPosition: null,
     brandPositions: []
   });
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -267,7 +265,7 @@ const ProductCategoriesPage = () => {
             onSuccess={handleImageUpload}
           >
             {({ open }) => (
-              <button type="button" onClick={() => open()} className="bg-[#b91b29] p-2 rounded">
+              <button type="button" onClick={() => open()} className="bg-[#b91b29] text-white p-2 rounded">
                 Upload an Image
               </button>
             )}
@@ -359,27 +357,6 @@ const ProductCategoriesPage = () => {
             onChange={(e) => setFormData({ ...formData, bestSeller: e.target.checked })}
             className="mr-2"
           />
-        </div>
-        <div className="mb-4 grid grid-cols-2 gap-4">
-          <div>
-            <label className="block">
-              Product Position
-            </label>
-            <input
-              type="number"
-              name="productPosition"
-              value={formData.productPosition || ''}
-              onChange={(e) => setFormData({ ...formData, productPosition: parseInt(e.target.value) })}
-              min="1"
-              className="mr-2 border p-2 rounded w-full"
-              required
-              style={{
-                width: "500px", // Set dynamic height based on content
-                resize: "none", // Disable manual resizing
-                overflow: "hidden", // Prevent scrollbars
-              }}
-            />
-          </div>
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">

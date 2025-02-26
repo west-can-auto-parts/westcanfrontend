@@ -14,8 +14,6 @@ export const PartSupplier = ({ subCategoryName }) => {
     ? 'https://westcanuserbackend.onrender.com/api/suppliers'
     : 'http://localhost:8080/api/suppliers';
 
-  // const brand=subCategoryName.brandAndPosition;
-  // console.log("BrandWithPosition: ", brand);
 
   useEffect(() => {
     if (!subCategoryName || !subCategoryName.brandAndPosition) return;
@@ -68,11 +66,11 @@ export const PartSupplier = ({ subCategoryName }) => {
       <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         {suppliersToDisplay.map((supplier) =>
-          supplier.logoUrl ? (
+          supplier.imageUrl ? (
             <div key={supplier.id} className="bg-white p-3">
               <div
                 className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2"
-                style={{ backgroundImage: `url(${supplier.logoUrl})` }}
+                style={{ backgroundImage: `url(${supplier.imageUrl})` }}
               />
               <p className="text-center text-xs text-gray-500 font-semibold">
                 {supplier.name}

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { FaHome, FaBriefcase, FaUserCog, FaClipboardList, FaWrench, FaBars  } from 'react-icons/fa';
+import { FaHome, FaBriefcase, FaUserCog, FaClipboardList, FaWrench, FaBars   } from 'react-icons/fa';
+import { AiTwotoneShop } from "react-icons/ai";
 import { FaRegPenToSquare } from "react-icons/fa6";
 import { GiFountainPen } from 'react-icons/gi';
 import { FaPerson, FaUser } from 'react-icons/fa6';
@@ -18,7 +19,8 @@ const Navigation = () => {
     { icon: FaBars, label:  "Sub-Categories", href: '/admin/subcategories' },
     { icon: FaBars, label:  "Product-Categories", href: '/admin/productcategories' },
     { icon: FaUser, label:  "Users", href: '/admin/user' },
-    { icon: FaUser, label:  "AdminProfile", href: '/admin/admin-profile' }
+    { icon: FaUser, label:  "AdminProfile", href: '/admin/admin-profile' },
+    { icon: AiTwotoneShop, label:  "Suppliers", href: '/admin/suppliers' },
   ];
   return (
     <nav className="w-full p-6 bg-gray-100 h-full shadow-md">

@@ -14,7 +14,6 @@ interface ProductCategory {
   tags: string[];
   featured: boolean;
   bestSeller: boolean;
-  productPosition: number | null;
   brandPositions: BrandPosition[];
 }
 
@@ -49,7 +48,6 @@ const EditProductCategoryPage = ({ params }: { params: { id: string } }) => {
     bestSeller: false,
     categoryId: '',
     subCategoryId: '',
-    productPosition: null,
     brandPositions: [],
   });
   const [allCategories, setAllCategories] = useState<Category[]>([]);
@@ -95,7 +93,6 @@ const EditProductCategoryPage = ({ params }: { params: { id: string } }) => {
           tags: productCategoryData.tags || [],
           featured: productCategoryData.featured || false,
           bestSeller: productCategoryData.bestSeller || false,
-          productPosition: productCategoryData.productPosition || null,
           brandPositions: productCategoryData.brandAndPosition 
             ? Object.entries(productCategoryData.brandAndPosition).map(([brandId, position]) => ({
                 brandId,
@@ -184,7 +181,6 @@ const EditProductCategoryPage = ({ params }: { params: { id: string } }) => {
     e.preventDefault();
 
     try {
-      // Convert brandPositions array to brandAndPosition object
       const brandAndPosition = formData.brandPositions.reduce((acc, { brandId, position }) => {
         if (brandId && position) {
           acc[brandId] = position;
@@ -348,20 +344,6 @@ const EditProductCategoryPage = ({ params }: { params: { id: string } }) => {
             checked={formData.bestSeller}
             onChange={handleInputChange}
             className="rounded border-gray-300 text-red-800 focus:ring-red-800"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product Position
-          </label>
-          <input
-            type="number"
-            name="productPosition"
-            value={formData.productPosition || ''}
-            onChange={(e) => setFormData({ ...formData, productPosition: parseInt(e.target.value) })}
-            min="1"
-            className="block w-[500px] rounded-md border-2 py-1.5 text-gray-900 shadow-sm ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-red-800 sm:text-sm sm:leading-6"
           />
         </div>
 
