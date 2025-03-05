@@ -25,8 +25,8 @@ const AdminUsersPage = () => {
 
     const isProduction = process.env.NODE_ENV === "production";
     const apiUrl = isProduction
-        ? "https://your-production-url.com/api"
-        : "http://localhost:8081/api";
+    ? "https://westcanadmin.onrender.com/api/admin-users"
+    : "http://localhost:8081/api/admin-users";
     const token = typeof window !== "undefined" ? localStorage.getItem("jwt_token") : null;
 
     useEffect(() => {
@@ -36,7 +36,7 @@ const AdminUsersPage = () => {
     const fetchAdminUsers = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`${apiUrl}/admin-users`, {
+            const response = await fetch(`${apiUrl}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const data = await response.json();
@@ -58,7 +58,7 @@ const AdminUsersPage = () => {
         if (!selectedUser) return;
 
         try {
-            await fetch(`${apiUrl}/admin-users/${selectedUser.id}`, {
+            await fetch(`${apiUrl}/${selectedUser.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const AdminUsersPage = () => {
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to delete this admin?")) return;
         try {
-            await fetch(`${apiUrl}/admin-users/${id}`, {
+            await fetch(`${apiUrl}/${id}`, {
                 method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -89,7 +89,7 @@ const AdminUsersPage = () => {
     const handleCreateSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
-            await fetch(`${apiUrl}/admin-users/create`, {
+            await fetch(`${apiUrl}/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

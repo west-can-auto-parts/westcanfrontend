@@ -24,7 +24,7 @@ const CreateCategoryPage = () => {
     : 'http://localhost:8081/admin/api';
 
 
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem("jwt_token") : null;
   const handleCreate = async () => {
     if (!name) {
       setError('Category name is required.');

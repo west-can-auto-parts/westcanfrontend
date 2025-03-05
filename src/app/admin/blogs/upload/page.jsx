@@ -65,7 +65,7 @@ const CreateBlog = () => {
     const apiUrl = isProduction
     ? "https://westcanadmin.onrender.com/admin/api"
     : "http://localhost:8081/api/blog";
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem("jwt_token") : null;
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
