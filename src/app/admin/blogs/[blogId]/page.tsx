@@ -63,7 +63,7 @@ const EditBlogPage = ({ params }: { params: { blogId: string } }) => {
     const apiUrl = isProduction
     ? "https://westcanadmin.onrender.com/admin/api"
     : "http://localhost:8081/api/blog";
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('') : null;
   useEffect(() => {
     // Fetch blog post details based on ID
     const fetchBlogPost = async () => {
