@@ -28,7 +28,7 @@ export const PartSupplier = ({ subCategoryName }) => {
           throw new Error("Failed to fetch suppliers");
         }
         const allSuppliers = await response.json();
-        console.log("SupplierList: ",allSuppliers);
+        console.log("SupplierList: ", allSuppliers);
 
         // Filter and sort suppliers based on brandAndPosition
         const brandPositions = subCategoryName.brandAndPosition || {};
@@ -52,8 +52,7 @@ export const PartSupplier = ({ subCategoryName }) => {
   }, [subCategoryName, apiUrl]);
 
   // Show limited suppliers on mobile, all on desktop
-  const suppliersToDisplay =
-    isMobile && !showMore ? suppliers.slice(0, 4) : suppliers;
+  const suppliersToDisplay = isMobile && !showMore ? suppliers.slice(0, 4) : suppliers.slice(0, 6);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -65,14 +64,22 @@ export const PartSupplier = ({ subCategoryName }) => {
 
   return (
     <div>
-      <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
+      <div className="flex justify-between items-center py-2 md:py-4">
+        <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
+        <a
+          href="/suppliers"
+          className="text-[#b21b29] font-semibold text-sm hover:underline"
+        >
+          View More
+        </a>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-        {suppliersToDisplay.map((supplier, index) =>
-          supplier.logoUrl ? (
-            <div key={index} className="bg-white p-3">
+        {suppliersToDisplay.map((supplier) =>
+          supplier.imageUrl ? (
+            <div key={supplier.id} className="bg-white p-3">
               <div
                 className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2"
-                style={{ backgroundImage: `url(${supplier.logoUrl})` }}
+                style={{ backgroundImage: `url(${supplier.imageUrl})` }}
               />
               <p className="text-center text-xs text-gray-500 font-semibold">
                 {supplier.name}
@@ -81,26 +88,6 @@ export const PartSupplier = ({ subCategoryName }) => {
           ) : null
         )}
       </div>
-
-      {/* Button to show more suppliers on mobile */}
-      {isMobile && !showMore && suppliers.length > 4 && (
-        <button
-          onClick={() => setShowMore(true)}
-          className="mt-4 text-[#b21b29] font-semibold"
-        >
-          View More
-        </button>
-      )}
-
-      {/* Button to collapse back the suppliers list */}
-      {isMobile && showMore && (
-        <button
-          onClick={() => setShowMore(false)}
-          className="mt-4 text-[#b21b29] font-semibold"
-        >
-          View Less
-        </button>
-      )}
     </div>
   );
 };

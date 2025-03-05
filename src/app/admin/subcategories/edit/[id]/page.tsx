@@ -112,7 +112,7 @@ const EditSubCategoryPage = ({ params }: { params: { id: string } }) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`/api/subcategories/${id}`, {
+      const res = await fetch(`${apiUrl}/subcategory/update/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(formData),

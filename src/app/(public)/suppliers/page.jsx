@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState,useEffect } from 'react';
-import suppliers from '@/datas/suppliers';
 import {FaChevronDown} from 'react-icons/fa'
 import { useRouter } from "next/navigation";
 
@@ -142,7 +141,7 @@ const SuppliersPage = () => {
         </div>
 
         {/* Suppliers Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 cursor-pointer">
           {currentSuppliers.map((supplier, index) => (
             supplier.imageUrl ? (
               <div key={index} className="bg-white p-3" onClick={() => handleSupplierClick(supplier)}>
