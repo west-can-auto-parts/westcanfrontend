@@ -51,7 +51,7 @@ export const PartSupplier = ({ subCategoryName }) => {
   }, [subCategoryName, apiUrl]);
 
   // Show limited suppliers on mobile, all on desktop
-  const suppliersToDisplay = isMobile && !showMore ? suppliers.slice(0, 4) : suppliers;
+  const suppliersToDisplay = isMobile && !showMore ? suppliers.slice(0, 4) : suppliers.slice(0, 6);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -63,7 +63,16 @@ export const PartSupplier = ({ subCategoryName }) => {
 
   return (
     <div>
+      <div className="flex justify-between items-center py-2 md:py-4">
       <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
+      <a
+          href="/suppliers"
+          className="text-[#b21b29] font-semibold text-sm hover:underline"
+        >
+          View More
+        </a>
+      </div>
+     
       <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         {suppliersToDisplay.map((supplier) =>
           supplier.imageUrl ? (
@@ -80,23 +89,7 @@ export const PartSupplier = ({ subCategoryName }) => {
         )}
       </div>
 
-      {isMobile && !showMore && suppliers.length > 4 && (
-        <button
-          onClick={() => setShowMore(true)}
-          className="mt-4 text-[#b21b29] font-semibold"
-        >
-          View More
-        </button>
-      )}
-
-      {isMobile && showMore && (
-        <button
-          onClick={() => setShowMore(false)}
-          className="mt-4 text-[#b21b29] font-semibold"
-        >
-          View Less
-        </button>
-      )}
+     
     </div>
   );
 };
