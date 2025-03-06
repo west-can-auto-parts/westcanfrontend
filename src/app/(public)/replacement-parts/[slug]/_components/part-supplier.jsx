@@ -67,9 +67,9 @@ export const PartSupplier = ({ subCategoryName }) => {
       <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
       <a
           href="/suppliers"
-          className="text-[#b21b29] font-semibold text-sm hover:underline"
+          className="text-[#b21b29] border border-[#b21b29] rounded px-3 py-1 font-semibold text-sm hover:bg-[#b21b29] hover:text-white transition-colors"
         >
-          View More
+          View All
         </a>
       </div>
      
