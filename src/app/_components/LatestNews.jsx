@@ -7,26 +7,49 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
-import suppliers from '@/datas/suppliers';
 
 const isProduction = process.env.NODE_ENV === 'production';
-  const apiUrl = isProduction
-    ? 'https://westcanuserbackend.onrender.com/api/blog'
-    : 'http://localhost:8080/api/blog';
+const apiUrl = isProduction
+  ? 'https://westcanuserbackend.onrender.com/api/blog'
+  : 'http://localhost:8080/api/blog';
+const apiUrl1 = isProduction
+  ? 'https://westcanuserbackend.onrender.com/api/suppliers'
+  : 'http://localhost:8080/api/suppliers';
+
 const fetchBlogs = async () => {
     const response = await fetch(apiUrl);
     const data = await response.json();
     return data;
 }
 
+const fetchSuppliers = async () => {
+    try {
+      const response = await fetch(`${apiUrl1}/all`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch suppliers");
+      }
+      const allSuppliers = await response.json();
+      return allSuppliers;
+    } catch (err) {
+      console.error(err);
+      return [];
+    }
+};
+
 const LatestNews = () => {
     const [visibleRows, setVisibleRows] = useState(20);
     const [blogs, setBlogs] = useState([]);
+    const [suppliers, setSuppliers] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const getBlogs = async () => {
             try {
                 const myBlogs = await fetchBlogs();
+                const suppliersList = await fetchSuppliers();
+                setSuppliers(suppliersList);
                 setBlogs(myBlogs);
             } catch (error) {
                 console.error(error, error.message);
@@ -38,8 +61,6 @@ const LatestNews = () => {
     const handleViewMore = () => {
         setVisibleRows(suppliers.length);
     };
-
-    const router = useRouter();
 
     return (
         <section className='py-12'>
@@ -121,13 +142,15 @@ const LatestNews = () => {
                                     },
                                 }}>
                                 {suppliers.slice(0, visibleRows).map((supplier, index) => (
-                                    supplier.logoUrl ? (
+                                    supplier.imageUrl ? (
                                         <SwiperSlide key={index} className="bg-white border-2 p-3 rounded-md">
                                             <div
-                                                className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2 transition-all duration-300 ease-in-out filter grayscale hover:grayscale-0"
-                                                style={{ backgroundImage: `url(${supplier.logoUrl})` }}
+                                                className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2 transition-all duration-300 ease-in-out"
+                                                style={{ backgroundImage: `url(${supplier.imageUrl})` }}
                                             />
-                                            <p className="text-center text-xs text-gray-500 font-semibold">{supplier.brand}</p>
+                                            <p className="text-center text-xs text-gray-500 font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+                                                {supplier.name}
+                                            </p>
                                         </SwiperSlide>
                                     ) : null
                                 ))}

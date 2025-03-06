@@ -113,12 +113,12 @@ const FeaturedProducts = () => {
                                             className="w-full h-[15vh] object-cover mb-4 rounded"
                                         />
                                         <div className="p-3 group-hover:bg-gray-100/75">
-                                            <h3
-                                                className="text-md md:text-md font-semibold mb-2 cursor-pointer"
-                                                onClick={()=>handleClick(product.name,product.categoryName)}
-                                            >
-                                                {product.name}
-                                            </h3>
+                                        <h3
+                                    className="text-md md:text-md font-semibold mb-2 cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis"
+                                    onClick={()=>handleClick(product.name,product.categoryName)}
+                                >
+                                    {product.name}
+                                </h3>
                                             <p
                                                 className="text-gray-600 mb-2 hidden md:block text-xs line-clamp-3 overflow-hidden cursor-pointer"
                                                 style={{

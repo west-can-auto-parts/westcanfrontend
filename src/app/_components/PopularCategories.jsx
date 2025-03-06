@@ -160,7 +160,9 @@ const PopularCategories = () => {
                                             <div className="bg-white shadow-md rounded h-full group transition" onClick={() => router.push(`/shop/${encodeURI(product.name)}`)}>
                                                 <img src={product.images[0] || "https://via.placeholder.com/250"} alt={product.name} className="w-full h-[25vh] object-contain mb-4 rounded" />
                                                 <div className="p-4">
-                                                    <h3 className="text-lg font-semibold mb-2 text-[#b21b29]">{product.name}</h3>
+                                                <h3 className="text-lg font-semibold mb-2 text-[#b21b29] whitespace-nowrap overflow-hidden text-ellipsis">
+                                                        {product.name}
+                                                    </h3>
                                                     <p className="text-sm text-gray-600 mb-2 line-clamp-3">{product.description}</p>
                                                     <div className="flex justify-between items-center mt-4">
                                                         <Link className='text-sm bg-[#b21b29] px-2 py-1 text-white rounded-md font-semibold flex gap-2 items-center' href={
