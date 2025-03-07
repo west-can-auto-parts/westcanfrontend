@@ -55,11 +55,13 @@ const SuppliersPage = () => {
   }, [apiUrl]);
 
   function stringToSlug(str) {
-    str = str.replace("&", "and");
+    str = str.replace("&", "and")
+            .replace("/", "_")
+            .replace("-","+");
     return str
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9 -]/g, "")
+      .replace(/[^a-z0-9 -_]/g, "")
       .replace(/\s+/g, "-")
       .replace(/--+/g, "-");
   }
@@ -176,11 +178,11 @@ const SuppliersPage = () => {
               Suppliers
             </p>
             <p className='text-justify text-sm pb-3'>
-              Drive your passion with confidence by choosing our premium Replacement Parts and tools from our highly trusted network of suppliers. We’ve partnered with industry-leading experts to bring you a vast collection of high-performance components for every make and model. From engines and transmissions to lighting and interior accessories, our suppliers deliver top-notch quality and reliability.</p>
+              Drive your passion with confidence by choosing our premium Replacement Parts and tools from our highly trusted network of suppliers. We've partnered with industry-leading experts to bring you a vast collection of high-performance components for every make and model. From engines and transmissions to lighting and interior accessories, our suppliers deliver top-notch quality and reliability.</p>
             <p className='text-justify text-sm pb-3'>
               Empower your DIY projects with our exceptional automotive tools procured from different suppliers. Be it wrenches and socket sets to diagnostic equipment and power tools, our suppliers offer unbeatable quality and durability. Our handpicked partners are the driving force behind our vast inventory of high-quality parts.</p>
             <p className='text-justify text-sm pb-3'>
-              Also, don’t forget to equip your workplace for success with our premier industrial supplies. We’ve partnered with some of the top notch suppliers to offer an extensive range of high-quality products that meet the demands of your business. Safety equipment, tools to maintenance supplies and materials, you name it all!
+              Also, don't forget to equip your workplace for success with our premier industrial supplies. We've partnered with some of the top notch suppliers to offer an extensive range of high-quality products that meet the demands of your business. Safety equipment, tools to maintenance supplies and materials, you name it all!
             </p>
           </div>
         </div>
