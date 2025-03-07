@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 export const PartSupplier = ({ subCategoryName }) => {
   const [showMore, setShowMore] = useState(false);
@@ -15,6 +16,24 @@ export const PartSupplier = ({ subCategoryName }) => {
     : 'http://localhost:8080/api/suppliers';
 
 
+  const router = useRouter();
+
+  function stringToSlug(str) {
+    str = str.replace("&", "and")
+            .replace("/", "_");
+    return str
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9 -_]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/--+/g, "-");
+  }
+
+  const handleSupplierClick = (supplier) => {
+    const brand = stringToSlug(supplier.name);
+    router.push(`/suppliers/${brand}`);
+  };
+
   useEffect(() => {
     if (!subCategoryName || !subCategoryName.brandAndPosition) return;
 
@@ -27,7 +46,7 @@ export const PartSupplier = ({ subCategoryName }) => {
           throw new Error("Failed to fetch suppliers");
         }
         const allSuppliers = await response.json();
-        console.log("SupplierList: ",allSuppliers);
+        console.log("SupplierList: ", allSuppliers);
 
         // Filter and sort suppliers based on brandAndPosition
         const brandPositions = subCategoryName.brandAndPosition || {};
@@ -64,21 +83,21 @@ export const PartSupplier = ({ subCategoryName }) => {
   return (
     <div>
       <div className="flex justify-between items-center py-2 md:py-4">
-      <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
-      <a
+        <p className="text-xl font-bold py-2 md:py-4">Our Suppliers</p>
+        <a
           href="/suppliers"
           className="text-[#b21b29] border border-[#b21b29] rounded px-3 py-1 font-semibold text-sm hover:bg-[#b21b29] hover:text-white transition-colors"
         >
           View All
         </a>
       </div>
-     
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 cursor-pointer">
         {suppliersToDisplay.map((supplier) =>
           supplier.imageUrl ? (
             <div key={supplier.id} className="bg-white p-3">
               <div
-                className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2"
+                className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2" onClick={() => handleSupplierClick(supplier)}
                 style={{ backgroundImage: `url(${supplier.imageUrl})` }}
               />
               <p className="text-center text-xs text-gray-500 font-semibold">
@@ -89,7 +108,7 @@ export const PartSupplier = ({ subCategoryName }) => {
         )}
       </div>
 
-     
+
     </div>
   );
 };

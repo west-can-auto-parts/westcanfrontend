@@ -10,11 +10,11 @@ import 'swiper/css/autoplay';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const apiUrl = isProduction
-  ? 'https://westcanuserbackend.onrender.com/api/blog'
-  : 'http://localhost:8080/api/blog';
+    ? 'https://westcanuserbackend.onrender.com/api/blog'
+    : 'http://localhost:8080/api/blog';
 const apiUrl1 = isProduction
-  ? 'https://westcanuserbackend.onrender.com/api/suppliers'
-  : 'http://localhost:8080/api/suppliers';
+    ? 'https://westcanuserbackend.onrender.com/api/suppliers'
+    : 'http://localhost:8080/api/suppliers';
 
 const fetchBlogs = async () => {
     const response = await fetch(apiUrl);
@@ -24,15 +24,15 @@ const fetchBlogs = async () => {
 
 const fetchSuppliers = async () => {
     try {
-      const response = await fetch(`${apiUrl1}/all`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch suppliers");
-      }
-      const allSuppliers = await response.json();
-      return allSuppliers;
+        const response = await fetch(`${apiUrl1}/all`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch suppliers");
+        }
+        const allSuppliers = await response.json();
+        return allSuppliers;
     } catch (err) {
-      console.error(err);
-      return [];
+        console.error(err);
+        return [];
     }
 };
 
@@ -44,6 +44,16 @@ const LatestNews = () => {
     const [error, setError] = useState(null);
     const router = useRouter();
 
+    function stringToSlug(str) {
+        str = str.replace("&", "and")
+            .replace("/", "_");
+        return str
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9 -_]/g, "")
+            .replace(/\s+/g, "-")
+            .replace(/--+/g, "-");
+    }
     useEffect(() => {
         const getBlogs = async () => {
             try {
@@ -60,6 +70,11 @@ const LatestNews = () => {
 
     const handleViewMore = () => {
         setVisibleRows(suppliers.length);
+    };
+
+    const handleSupplierClick = (supplier) => {
+        const brand = stringToSlug(supplier.name);
+        router.push(`/suppliers/${brand}`);
     };
 
     return (
@@ -143,7 +158,7 @@ const LatestNews = () => {
                                 }}>
                                 {suppliers.slice(0, visibleRows).map((supplier, index) => (
                                     supplier.imageUrl ? (
-                                        <SwiperSlide key={index} className="bg-white border-2 p-3 rounded-md">
+                                        <SwiperSlide key={index} className="bg-white border-2 p-3 rounded-md cursor-pointer" onClick={() => handleSupplierClick(supplier)}>
                                             <div
                                                 className="bg-white h-[100px] bg-contain bg-no-repeat bg-center p-2 transition-all duration-300 ease-in-out"
                                                 style={{ backgroundImage: `url(${supplier.imageUrl})` }}
@@ -159,7 +174,7 @@ const LatestNews = () => {
                                 <div className="text-center mt-4">
                                     <button
                                         className="px-4 mt-6 py-2 text-white bg-[#b12b29] text-xs rounded"
-                                        onClick={()=>router.push('/suppliers')}
+                                        onClick={() => router.push('/suppliers')}
                                     >
                                         View All
                                     </button>

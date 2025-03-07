@@ -66,11 +66,13 @@ const Page = ({ params }) => {
         const subCategoryData = JSON.parse(subCategoryText);
         const allSubCategoryData = JSON.parse(allSubCategoryText);
 
-        // Sort products by productPosition
+        // Sort products based on productCategoryAndPosition from subCategoryData
+        const positionMap = subCategoryData.productCategoryAndPosition || {};
+        
         const sortedProducts = productData.sort((a, b) => {
-          // Handle null or undefined productPosition
-          const posA = a.productPosition === null ? Infinity : a.productPosition;
-          const posB = b.productPosition === null ? Infinity : b.productPosition;
+          // Get positions from the positionMap, using product ID or name
+          const posA = positionMap[a.id] || positionMap[a.name] || Infinity;
+          const posB = positionMap[b.id] || positionMap[b.name] || Infinity;
           return posA - posB;
         });
 
